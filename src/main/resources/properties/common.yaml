@@ -1,0 +1,34 @@
+#Common properties
+common:
+  errors:
+    error-code-400: "BAD_REQUEST"
+    error-code-404: "NOT_FOUND"
+    error-code-405: "METHOD_NOT_ALLOWED"
+    error-code-406: "NOT_ACCEPTABLE"
+    error-code-415: "UNSUPPORTED_MEDIA_TYPE"
+    error-code-500: "INTERNAL_SERVER_ERROR"
+    error-code-501: "NOT_IMPLEMENTED"
+    
+#untilsuccessful
+untilSuccess:
+  retries: "2"
+  timeInterval: "3000"    
+  
+#Source and Target Names
+source:
+  name: "EventFlow"  
+target:
+  name: "PDI-Enterprise"  
+  
+#Logger category
+milestone:
+  category: "LOG"
+logger:
+  category: "LOG"  
+
+#DB query timeout Details
+query:
+  timeout: "10"
+  timeoutUnit: "MINUTES" 
+  maxRows: "30000"   
+    

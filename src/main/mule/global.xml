@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<db:config name="db_config" doc:name="Database Config" doc:id="9dc8ea48-bb4d-4f9c-92f8-a46477dd2618" >
+		<db:oracle-connection host="${db.host}" user="${db.user}" password="${secure::db.password}" serviceName="${db.service}" port="${db.port}"/>
+	</db:config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="5c8ef4b9-f457-4eae-975b-1ec8ef0474e1" >
+		<salesforce:basic-connection username="${sf.user}" password="${secure::sf.password}" securityToken="${secure::sf.token}" url="${sf.authURL}" />
+	</salesforce:sfdc-config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="defd9eb9-77f7-42d7-ab15-23311066a834" />
+	<configuration-properties doc:name="Configuration properties" doc:id="d60577a5-ac01-4b64-befa-f288933bf80b" file="properties/${env}-properties.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="7ca8f4db-3ae7-496c-abe7-0ae5545be268" file="properties/common.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="ea4df38c-c260-47cc-802f-aed4ab77c0bb" file="properties/${env}-secure-properties.yaml" key="${encrypt.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<global-property doc:name="Global Property" doc:id="ed042570-79c1-4311-b639-58cc3df6d7f1" name="encrypt.key" value="secure12345" />
+		
+</mule>
