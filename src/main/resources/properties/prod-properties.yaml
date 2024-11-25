@@ -3,9 +3,12 @@ sf:
   authURL : "https://ntnconnect--muledev.sandbox.my.salesforce.com/services/Soap/u/58.0"
   
 db:
-  host: "129.147.16.140"
+  host: "129.147.16.139"
   port: "1521"
-  user: "c_mulesoft"
-  service: "jdorcldv.netjiuwoz.vcnzgqox.oraclevcn.com"
-  
+  user: "JWiewel"
+  service: "jdorclpy.netjiuwoz.vcnzgqox.oraclevcn.com"
+  countQuery: "SELECT COUNT(*) FROM CRPDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
+  AND RCAA19 NOT LIKE '%#%'  AND RCI75MCHFD = 'Y'"
+  query: "SELECT  RCAA19 ,RC74USTA FROM CRPDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
+  AND RCAA19 NOT LIKE '%#%' AND RCI75MCHFD = 'Y'" 
 

@@ -21,10 +21,7 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 			<ee:message >
 			</ee:message>
 			<ee:variables >
-				<ee:set-variable variableName="countQuery" ><![CDATA["SELECT COUNT(*) FROM TESTDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
-  AND RCAA19 NOT LIKE '%#%'  AND RCI75MCHFD = 'Y'"
-
-//" Select COUNT(*) from TESTDTA.F57JPNPM where RCAA19 like 'Z1%' "]]></ee:set-variable>
+				<ee:set-variable variableName="countQuery" ><![CDATA[p('db.countQuery')]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
 		<db:select doc:name="Select" doc:id="ab2b5311-fb5e-44cb-8030-7a28c029573e" config-ref="db_config" target="count">
@@ -34,9 +31,7 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 					<ee:message>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="query"><![CDATA["SELECT  RCAA19 ,RC74USTA FROM TESTDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
- AND RCAA19 NOT LIKE '%#%' AND RCI75MCHFD = 'Y'"
-// "Select RCAA19 ,RC74USTA from TESTDTA.F57JPNPM where RCAA19 like 'Z1%' "]]></ee:set-variable>
+						<ee:set-variable variableName="query"><![CDATA[p('db.query')]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 		<db:select doc:name="Select" doc:id="872014a1-a651-486d-8d3e-7198b280e6ea" config-ref="db_config" target="dbresponse" fetchSize="#[vars.count[0].'COUNT(*)']" maxRows="#[vars.count[0].'COUNT(*)']">
