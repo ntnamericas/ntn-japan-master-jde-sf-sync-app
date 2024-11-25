@@ -1,0 +1,11 @@
+sf:
+  user: "ntnmule@prowesssoft.com.muledev"
+  authURL: "https://test.salesforce.com/services/Soap/u/56.0" 
+  
+db:
+  host: "129.147.16.139"
+  port: "1521"
+  user: "c_mulesoft"
+  svc: "jdorclpy.netjiuwoz.vcnzgqox.oraclevcn.com"
+  
+
