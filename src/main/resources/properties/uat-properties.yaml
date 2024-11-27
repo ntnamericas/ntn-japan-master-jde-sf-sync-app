@@ -1,5 +1,5 @@
 sf:
-  user: "ntnmule@prowesssoft.com.muledev"
+  user: "mulesoftintegration@ntnusa.com.stage"
   authURL: "https://test.salesforce.com/services/Soap/u/56.0" 
   
 db:
