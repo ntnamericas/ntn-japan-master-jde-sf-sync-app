@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
-	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce-composite="http://www.mulesoft.org/schema/mule/salesforce-composite"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
-http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 
-	<flow name="ntn-japan-master-jde-sapiFlow" doc:id="578c10aa-2bf5-4b95-9baa-1d07c8c7d1f8" initialState="started">
+	<flow name="ntn-japan-master-jde-sapiFlow-new" doc:id="578c10aa-2bf5-4b95-9baa-1d07c8c7d1f8" initialState="started">
 		<scheduler doc:name="Scheduler" doc:id="044f123d-8c62-4422-9421-1c91f4bb05a5" >
 			<scheduling-strategy >
 				<fixed-frequency timeUnit="MINUTES" frequency="2"/>
@@ -34,22 +36,24 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 						<ee:set-variable variableName="query"><![CDATA[p('db.query')]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
-		<db:select doc:name="Select" doc:id="872014a1-a651-486d-8d3e-7198b280e6ea" config-ref="db_config" target="dbresponse" fetchSize="#[vars.count[0].'COUNT(*)']" maxRows="#[vars.count[0].'COUNT(*)']">
+		<db:select doc:name="Select" doc:id="872014a1-a651-486d-8d3e-7198b280e6ea" config-ref="db_config" fetchSize="#[vars.count[0].'COUNT(*)']" maxRows="#[vars.count[0].'COUNT(*)']">
 			<db:sql><![CDATA[#[vars.query]]]></db:sql>
 		</db:select>
+		<logger level="INFO" doc:name="Logger" doc:id="7842c0de-0bc6-4a00-889e-a775f1de0ef1" message="#[sizeOf(payload)]" />
 		<ee:transform doc:name="Transform Message" doc:id="fada2861-0b1f-4418-9f3e-b4a77afcc82b" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[output application/json
 ---
-vars.dbresponse]]></ee:set-payload>
+payload]]></ee:set-payload>
 			</ee:message>
 			<ee:variables >
 				<ee:set-variable variableName="RCAA19" ><![CDATA[""]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="7842c0de-0bc6-4a00-889e-a775f1de0ef1" message="#[payload]" />
-		<foreach doc:name="For Each" doc:id="d46d42fa-ad4a-4a21-b4ea-6eb59cfc9944" >
-			<ee:transform doc:name="Transform Message" doc:id="61c993e6-60df-48f1-adfe-ea289da4c542">
+		<batch:job jobName="ntn-japan-master-jde-sapi-copyBatch_Job" doc:id="45d0a331-3f41-4368-b322-914f3ad26573" blockSize="1000">
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="6686045f-2adf-4835-a6ae-f70e7dde832a" >
+					<ee:transform doc:name="Transform Message" doc:id="61c993e6-60df-48f1-adfe-ea289da4c542">
 						<ee:message>
 						</ee:message>
 						<ee:variables>
@@ -57,36 +61,25 @@ vars.dbresponse]]></ee:set-payload>
 output application/java
 ---
 "SELECT Part_Number__c, Id ,Name FROM Product2 WHERE Part_Number__c = " ++ "'" ++(payload."RCAA19" replace " " with ("") ) ++ "'"]]></ee:set-variable>
-					<ee:set-variable variableName="errorIds" ><![CDATA[[] + vars.errorIds default {}]]></ee:set-variable>
+					<ee:set-variable variableName="errorIds"><![CDATA[[] + vars.errorIds default {}]]></ee:set-variable>
 						</ee:variables>
 					</ee:transform>
-			<salesforce:query doc:name="Query" doc:id="a0689a64-277d-480b-b298-5cad47ab4164" config-ref="Salesforce_Config" target="sfresponse">
-			<salesforce:salesforce-query><![CDATA[#[vars.query]]]></salesforce:salesforce-query>
-		</salesforce:query>
-			<choice doc:name="Choice" doc:id="3d360719-c745-445a-aeed-fcfc8c1d4511">
-						<when expression="#[sizeOf(vars.sfresponse) &gt; 0]">
-							<ee:transform doc:name="Transform Message" doc:id="600c8c1d-ccd6-45ef-9f5e-8c7799eb2c0c">
+					<ee:transform doc:name="Transform Message" doc:id="600c8c1d-ccd6-45ef-9f5e-8c7799eb2c0c">
 								<ee:message>
-								</ee:message>
-								<ee:variables>
-									<ee:set-variable variableName="RCAA19"><![CDATA[%dw 2.0
+							<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-trim(payload.RCAA19) default "" ++ "," ++ vars.RCAA19 as String]]></ee:set-variable>
-							<ee:set-variable variableName="upload" ><![CDATA[%dw 2.0
-output application/java
----
-[{
-  Part_Number__c : payload.RCAA19,
+{
+  Part_Number__c : trim(payload.RCAA19),
   Stocking_Type_Code__c: 
-    if (payload."RC74USTA" == "0") "0-Customer pending apart no."
-    else if (payload."RC74USTA" == "1") "1-Available part no."
-    else if (payload."RC74USTA" == "2") "2-Old part no."
-    else if (payload."RC74USTA" == "3") "3-Part to be phased out"
-    else if (payload."RC74USTA" == "4") "4-Purchased part"
-    else if (payload."RC74USTA" == "6") "6-Production plan part no."
-    else if (payload."RC74USTA" == "7") "7-Dead part no."
-    else if (payload."RC74USTA" == "9") "9-Substitution part no."
+    if (trim(payload."RC74USTA") == "0") "0-Customer pending apart no."
+    else if (trim(payload."RC74USTA") == "1") "1-Available part no."
+    else if (trim(payload."RC74USTA") == "2") "2-Old part no."
+    else if (trim(payload."RC74USTA") == "3") "3-Part to be phased out"
+    else if (trim(payload."RC74USTA") == "4") "4-Purchased part"
+    else if (trim(payload."RC74USTA") == "6") "6-Production plan part no."
+    else if (trim(payload."RC74USTA") == "7") "7-Dead part no."
+    else if (trim(payload."RC74USTA") == "9") "9-Substitution part no."
     else "" ,
     External_ID__c : trim(payload.RCAA19) ++ "-JPN-NTN" ,
     NTN_Company_Number__c : "00001",
@@ -94,64 +87,164 @@ output application/java
     Brand__c : "NTN" ,
     Part_Number_Type__c : "Base" ,
     Source__c : "JAPAN",
-    ProductCode : payload.RCAA19 ,
+    ProductCode : (trim(payload.RCAA19)),
     CIF_Min__c : 0.00,
     Landed_Cost_Max__c : 0.00 ,
     Landed_Cost_Min__c : 0.00 ,
     Estimated_Production_Lead_Time_Max__c : "0.00",
     Estimated_Production_Lead_Time_Min__c : "0.00",
     IsActive: true as Boolean ,
-    Id : vars.sfresponse.Id[0]
-}]
-]]></ee:set-variable>
+    Name: (trim(payload.RCAA19))
+}
+]]></ee:set-payload>
+								</ee:message>
+								<ee:variables>
+									<ee:set-variable variableName="RCAA19"><![CDATA[%dw 2.0
+output application/json
+---
+trim(payload.RCAA19) default "" ++ "," ++ vars.RCAA19 as String]]></ee:set-variable>
 								</ee:variables>
 							</ee:transform>
-							<salesforce:upsert doc:name="Upsert" doc:id="b2edf642-6de0-49f6-9d3a-3db50bc25284" config-ref="Salesforce_Config" objectType="Product2" externalIdFieldName="External_ID__c">
-						<salesforce:records ><![CDATA[#[vars.upload]]]></salesforce:records>
-					</salesforce:upsert>
-					<choice doc:name="Choice" doc:id="33a37959-c83a-491a-a0f5-72157aa8cd31" >
-						<when expression="#[payload.successful != true]">
-							<ee:transform doc:name="Transform Message" doc:id="44d000ff-42bc-464e-833e-1b6b3b81f802">
-						<ee:message>
-						</ee:message>
-						<ee:variables>
-									<ee:set-variable variableName="errorIds" ><![CDATA[%dw 2.0
-output application/json skipNullOn = 'everywhere'
+					<salesforce:query doc:name="Query" doc:id="a0689a64-277d-480b-b298-5cad47ab4164" config-ref="Salesforce_Config" target="sfresponse">
+			<salesforce:salesforce-query><![CDATA[#[vars.query]]]></salesforce:salesforce-query>
+		</salesforce:query>
+					<ee:transform doc:name="Transform Message" doc:id="a8e419d9-7322-4e34-b9aa-6bee62467ae7" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
 ---
- [{
-	part_number : vars.upload.Part_Number__c[0],
-	successMessage : payload.successful	
-}
-] + vars.errorIds  default [] ]]></ee:set-variable>
-						</ee:variables>
+payload ++ {"sfResponse": sizeOf(vars.sfresponse)}]]></ee:set-payload>
+						</ee:message>
 					</ee:transform>
-							<logger level="INFO" doc:name="Logger" doc:id="f20c6951-74f8-4b1b-8b4e-6f1dc489d729" message="#[payload.successful]" />
-						</when>
-						<otherwise >
-							<logger level="INFO" doc:name="Logger" doc:id="eb699172-6864-410d-b78f-a7fb59f93c36" message='#["Update Successful"]'/>
-							<!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message" doc:id="995a0035-70e1-4cf5-b3f7-a8d1a2889717" >
-								<ee:message >
-								</ee:message>
-								<ee:variables >
-									<ee:set-variable variableName="successIds" ><![CDATA[%dw 2.0
-output application/json skipNullOn = 'everywhere'
-&#45;&#45;-
- [{
-	part_number : vars.upload.Part_Number__c[0&#93;,
-	successMessage : payload.successful
-	
-}
-&#93; + vars.successIds  default [&#93; &#93;&#93;></ee:set-variable>
-								</ee:variables>
-							</ee:transform> [STUDIO] -->
-						</otherwise>
-					</choice>
-						</when>
-						<otherwise>
-							<logger level="INFO" doc:name="Logger" doc:id="47f39c35-2d60-4d7c-a4d0-78fd38dc8fb1" message="#[payload.successful]" />
-						</otherwise>
-					</choice>
-		</foreach>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="7d97a256-8961-487c-b72b-84af97e25912" size="5">
+						<ee:transform doc:name="Transform Message" doc:id="d797e419-94da-4c2c-8bb9-91da745db269">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map read( $, 'application/json')]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<scatter-gather doc:name="Scatter-Gather" doc:id="d84b6ff4-7bc7-42d0-952b-ab4fb64f8685" >
+							<route >
+								<ee:transform doc:name="Transform Message" doc:id="60708492-fc98-4b68-8532-439c80f488a3" >
+									<ee:message >
+										<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload 
+    filter ((item, index) -> item.sfResponse != 1) 
+    map (item) -> item - "sfResponse"
+]]></ee:set-payload>
+									</ee:message>
+									<ee:variables >
+										<ee:set-variable resource="dwl/var-createPB.dwl" variableName="createPB" />
+									</ee:variables>
+								</ee:transform>
+								<salesforce:create doc:name="Create" doc:id="c070ee01-aaf7-48b0-93b7-c23d3ad05a52" config-ref="Salesforce_Config" type="Product2">
+							</salesforce:create>
+								<logger level="INFO" doc:name="Logger" doc:id="2a63c786-7fce-4e6d-ae33-0d742cf1e81c" message="#[%dw 2.0&#10;output applicaiton/json&#10;---&#10;payload]" />
+								<ee:transform doc:name="Transform Message" doc:id="405cac14-f5a6-472a-a322-4b962b6d5039">
+									<ee:message>
+									</ee:message>
+									<ee:variables >
+										<ee:set-variable resource="dwl/var-product2id.dwl" variableName="product2id" />
+									</ee:variables>
+								</ee:transform>
+								<flow-ref doc:name="get-pricebook-id" doc:id="c89ae6aa-8910-403b-9e31-3c0bd8443574" name="get-pricebook-id"/>
+								<ee:transform doc:name="Transform Message" doc:id="d6a495a8-468f-4113-9822-e8bd37e92801" >
+									<ee:message >
+										<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.createPB map (item, index) -> (
+{
+  	IsActive: item.IsActive,
+  	CurrencyIsoCode : if(item.CurrencyIsoCode == "00001") "CAD" else "USD",
+  	Product2Id : vars.product2id.Product2Id[index],
+  	PriceBookId: payload,
+  	UnitPrice : 0 
+})]]></ee:set-payload>
+									</ee:message>
+								</ee:transform>
+								<async doc:name="Async" doc:id="a941c997-50e1-46e8-a1f4-2debb8bd4692" >
+									<http:request method="POST" doc:id="6399901f-26d2-4661-bd0e-2f027dd45645" config-ref="HTTP_Request_configuration" path="${pricebooks.uri}" doc:name="Request" />
+									<logger level="INFO" doc:name="Logger" doc:id="9335b01e-0ee9-4665-a989-2b7d97d4cafe" message='#["Request to PriceBooks API Completed."]' />
+								</async>
+							</route>
+							<route >
+								<ee:transform doc:name="Transform Message" doc:id="12c1e18d-f4a5-4026-a6ff-4af71a784c8d" >
+									<ee:message >
+										<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload 
+    filter ((item, index) -> item.sfResponse != 0) 
+    map (item) -> item - "sfResponse"
+]]></ee:set-payload>
+									</ee:message>
+								</ee:transform>
+								<salesforce:update doc:name="Update" doc:id="9c9617a3-312c-4934-aa47-9ee55f25427c" config-ref="Salesforce_Config" type="Product2">
+								</salesforce:update>
+								<logger level="INFO" doc:name="Logger" doc:id="eb1ea789-b377-49e4-ba3f-4e56b7046e3e" message="#[%dw 2.0&#10;output applicaiton/json&#10;---&#10;payload]" />
+							</route>
+						</scatter-gather>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="8cc4323b-74aa-47e3-9794-8f5dbd5a5bdb" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
 		<logger level="INFO" doc:name="End Logger" doc:id="b07e6ca2-ce11-4e97-ac0c-067857a618a1" message='#[flatten(vars.errorIds ) filter ((item) -&gt; item != null)]'/>
 	</flow>
+	<sub-flow name="get-pricebook-id" doc:id="3be9a04f-af55-4ae2-825f-67e72f5553ef" >
+		<ee:transform doc:name="Transform Message" doc:id="22ad7221-bb69-4b4d-bbb8-ca2465db4b7e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "compositeRequest": [
+
+      {
+        "method": "GET",
+        "referenceId": "refPricebook11" as String,
+        "url": "/services/data/v57.0/query/?q=SELECT id from Pricebook2 where JDE_Price_Book__c = '11'"
+      },
+	  {
+        "method": "GET",
+        "referenceId": "refPricebook3" as String,
+        "url": "/services/data/v57.0/query/?q=SELECT id from Pricebook2 where JDE_Price_Book__c = '3'"
+      },
+	  {
+        "method": "GET",
+        "referenceId": "refPricebook4" as String,
+        "url": "/services/data/v57.0/query/?q=SELECT id from Pricebook2 where JDE_Price_Book__c = '4'"
+      },
+	  {
+        "method": "GET",
+        "referenceId": "refPricebook14" as String,
+        "url": "/services/data/v57.0/query/?q=SELECT id from Pricebook2 where JDE_Price_Book__c = '14'"
+      },
+      {
+        "method": "GET",
+        "referenceId": "refPricebook15" as String,
+        "url": "/services/data/v57.0/query/?q=SELECT id from Pricebook2 where JDE_Price_Book__c = '15'"
+      }
+	  ]
+	}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce-composite:execute-composite-request doc:name="Execute composite request" doc:id="efdb93fa-a272-4a4f-a42e-b34321c12fd2" config-ref="Salesforce_Composite_Config" />
+		<ee:transform doc:name="Transform Message" doc:id="4bf78030-17a2-4d3c-bac8-1fb3d2830d5d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{id:(payload.compositeResponse map ($..body."records")[0]) map ((item, index) -> item[0].Id)}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="bda8e6fb-b6f7-445b-bcd2-2de9f36d1261" message='"The list of PriceBook IDs are : " ++ #[payload]' />
+	</sub-flow>
 </mule>
