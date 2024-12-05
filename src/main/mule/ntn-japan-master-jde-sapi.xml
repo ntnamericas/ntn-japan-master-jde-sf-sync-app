@@ -201,39 +201,7 @@ payload
 	<sub-flow name="get-pricebook-id" doc:id="3be9a04f-af55-4ae2-825f-67e72f5553ef" >
 		<ee:transform doc:name="Transform Message" doc:id="22ad7221-bb69-4b4d-bbb8-ca2465db4b7e" >
 			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{
-  "compositeRequest": [
-
-      {
-        "method": "GET",
-        "referenceId": "refPricebook11" as String,
-        "url": "/services/data/v57.0/query/?q=SELECT id from Pricebook2 where JDE_Price_Book__c = '11'"
-      },
-	  {
-        "method": "GET",
-        "referenceId": "refPricebook3" as String,
-        "url": "/services/data/v57.0/query/?q=SELECT id from Pricebook2 where JDE_Price_Book__c = '3'"
-      },
-	  {
-        "method": "GET",
-        "referenceId": "refPricebook4" as String,
-        "url": "/services/data/v57.0/query/?q=SELECT id from Pricebook2 where JDE_Price_Book__c = '4'"
-      },
-	  {
-        "method": "GET",
-        "referenceId": "refPricebook14" as String,
-        "url": "/services/data/v57.0/query/?q=SELECT id from Pricebook2 where JDE_Price_Book__c = '14'"
-      },
-      {
-        "method": "GET",
-        "referenceId": "refPricebook15" as String,
-        "url": "/services/data/v57.0/query/?q=SELECT id from Pricebook2 where JDE_Price_Book__c = '15'"
-      }
-	  ]
-	}]]></ee:set-payload>
+				<ee:set-payload resource="dwl/priceBooks.dwl" />
 			</ee:message>
 		</ee:transform>
 		<salesforce-composite:execute-composite-request doc:name="Execute composite request" doc:id="efdb93fa-a272-4a4f-a42e-b34321c12fd2" config-ref="Salesforce_Composite_Config" />
