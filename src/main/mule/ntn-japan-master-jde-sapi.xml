@@ -186,7 +186,7 @@ payload
 								</ee:transform>
 								<salesforce:update doc:name="Update" doc:id="9c9617a3-312c-4934-aa47-9ee55f25427c" config-ref="Salesforce_Config" type="Product2">
 								</salesforce:update>
-								<logger level="INFO" doc:name="Logger" doc:id="eb1ea789-b377-49e4-ba3f-4e56b7046e3e" message="#[%dw 2.0&#10;output applicaiton/json&#10;---&#10;payload]" />
+								<logger level="INFO" doc:name="Logger" doc:id="eb1ea789-b377-49e4-ba3f-4e56b7046e3e" message="#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {Successful : payload.successful}&#10;else (payload.items map() -&gt; {&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]" />
 							</route>
 						</scatter-gather>
 					</batch:aggregator>
@@ -197,6 +197,7 @@ payload
 			</batch:on-complete>
 		</batch:job>
 		<logger level="INFO" doc:name="End Logger" doc:id="b07e6ca2-ce11-4e97-ac0c-067857a618a1" message='#[flatten(vars.errorIds ) filter ((item) -&gt; item != null)]'/>
+		<error-handler ref="global-error-handler"/>
 	</flow>
 	<sub-flow name="get-pricebook-id" doc:id="3be9a04f-af55-4ae2-825f-67e72f5553ef" >
 		<ee:transform doc:name="Transform Message" doc:id="22ad7221-bb69-4b4d-bbb8-ca2465db4b7e" >

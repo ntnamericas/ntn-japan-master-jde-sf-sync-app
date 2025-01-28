@@ -7,3 +7,7 @@ db:
 sf:
   token: "![1O3V3uqG9wtByGHznFQhsc1Q4BYp3HsPQbnzOU3Ieso=]"
   password: "![hRt1ri9KnH5UalfO4hI4Vg==]"
+  
+smtp:
+  user: "![hRt1ri9KnH7VngaJcayGZ0D8arLBERHy1f3i+Ca4XPI=]"
+  password: "![Yk3HBzCPPp5RL3nOfWNzirX1mi98hVMs]"  

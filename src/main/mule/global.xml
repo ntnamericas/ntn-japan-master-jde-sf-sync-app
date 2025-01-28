@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce-composite="http://www.mulesoft.org/schema/mule/salesforce-composite"
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce-composite="http://www.mulesoft.org/schema/mule/salesforce-composite"
 	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
-	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
@@ -28,5 +30,16 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="584ce206-5a8f-424a-969e-93bc7cce6da6" basePath="${pricebooks.basePath}" >
 		<http:request-connection host="${pricebooks.host}" port="${pricebooks.port}" protocol="HTTPS"/>
 	</http:request-config>
+		<email:smtp-config name="Email_SMTP1"
+		doc:name="Email SMTP" doc:id="4fa91ca3-4676-4d2a-a4cd-1f9da663e774">
+		<email:smtp-connection host="${smtp.host}"
+			port="${smtp.port}" user="${secure::smtp.user}"
+			password="${secure::smtp.password}">
+			<email:properties>
+				<email:property key="mail.smtp.starttls.enable"
+					value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
 		
 </mule>

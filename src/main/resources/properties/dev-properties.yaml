@@ -20,3 +20,7 @@ pricebooks:
   basePath : "/api/"
   uri : "pricebooks" 
 
+smtp:
+  host: "smtp.office365.com"
+  port: "25"  
+  to: "simran.modi@prowesssoft.com"  
