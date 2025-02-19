@@ -59,14 +59,20 @@ payload]]></ee:set-payload>
 						<ee:variables>
 							<ee:set-variable variableName="query"><![CDATA[%dw 2.0
 output application/java
+var cleanedPartNumber = (payload.RCAA19 default "") replace " " with ""
+var externalId = trim(payload.RCAA19 default "") ++ "-JPN-NTN"
 ---
-"SELECT Part_Number__c, Id ,Name FROM Product2 WHERE Part_Number__c = " ++ "'" ++(payload."RCAA19" replace " " with ("") ) ++ "'"]]></ee:set-variable>
-					<ee:set-variable variableName="errorIds"><![CDATA[[] + vars.errorIds default {}]]></ee:set-variable>
+"SELECT Part_Number__c, Id, Name FROM Product2 WHERE  External_ID__c = '" ++ externalId ++ "'"
+]]></ee:set-variable>
+							<ee:set-variable variableName="cleanedPartNumber" ><![CDATA[%dw 2.0
+output application/java
+---
+(payload.RCAA19 default "") replace " " with ""]]></ee:set-variable>
 						</ee:variables>
 					</ee:transform>
 					<ee:transform doc:name="Transform Message" doc:id="600c8c1d-ccd6-45ef-9f5e-8c7799eb2c0c">
 								<ee:message>
-							<ee:set-payload ><![CDATA[%dw 2.0
+							<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
@@ -108,53 +114,130 @@ trim(payload.RCAA19) default "" ++ "," ++ vars.RCAA19 as String]]></ee:set-varia
 					<salesforce:query doc:name="Query" doc:id="a0689a64-277d-480b-b298-5cad47ab4164" config-ref="Salesforce_Config" target="sfresponse">
 			<salesforce:salesforce-query><![CDATA[#[vars.query]]]></salesforce:salesforce-query>
 		</salesforce:query>
+					<choice doc:name="Choice" doc:id="bb3189ed-2016-4f47-b708-32f0a4ae3089" >
+						<when expression="#[sizeOf(vars.sfresponse) &gt; 0]">
+							<flow-ref doc:name="Flow Reference" doc:id="8c3dcf11-d284-45e3-8358-23ebb445248f" name="update_salesforce_Sub_Flow" />
+						</when>
+						<otherwise >
+							<ee:transform doc:name="Transform Message" doc:id="369c1371-6126-48d2-9d8c-31b966fe9d08" >
+								<ee:message >
+								</ee:message>
+								<ee:variables >
+									<ee:set-variable variableName="queryPartNumber" ><![CDATA[%dw 2.0
+output application/java
+var externalId = trim(payload.RCAA19 default "") ++ "-JPN-NTN"
+---
+"SELECT Part_Number__c, Id, Name FROM Product2 WHERE  Part_Number__c = '" ++ vars.cleanedPartNumber ++ "'"
+]]></ee:set-variable>
+								</ee:variables>
+							</ee:transform>
+							<salesforce:query doc:name="Query" doc:id="f24086cb-9314-4e90-900a-8df3fdd07695" config-ref="Salesforce_Config" target="partNumber">
+								<salesforce:salesforce-query ><![CDATA[#[vars.queryPartNumber]]]></salesforce:salesforce-query>
+							</salesforce:query>
+							<choice doc:name="Choice" doc:id="6a8e4b12-356b-4dd2-beb6-58257597b4e4" >
+								<when expression="#[sizeOf(vars.partNumber) &gt; 0]">
+									<flow-ref doc:name="Flow Reference update subflow" doc:id="f126013e-bb2d-4f89-90b4-3d5110aea6fa" name="update_salesforce_Sub_Flow"/>
+								</when>
+								<otherwise >
+									<flow-ref doc:name="Flow Reference create_salesforce_sub_Flow" doc:id="ec2d6be2-5577-483a-8b81-27f6121dc994" name="create_salesforce_sub_Flow"/>
+								</otherwise>
+							</choice>
+						</otherwise>
+					</choice>
 					<ee:transform doc:name="Transform Message" doc:id="a8e419d9-7322-4e34-b9aa-6bee62467ae7" >
 						<ee:message >
 							<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload ++ {"sfResponse": sizeOf(vars.sfresponse)}]]></ee:set-payload>
+payload ++ {"Id": (vars.sfresponse."Id"[0])}]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
 					<batch:aggregator doc:name="Batch Aggregator" doc:id="7d97a256-8961-487c-b72b-84af97e25912" size="5">
-						<ee:transform doc:name="Transform Message" doc:id="d797e419-94da-4c2c-8bb9-91da745db269">
+						<!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message" doc:id="d797e419-94da-4c2c-8bb9-91da745db269">
 							<ee:message>
 								<ee:set-payload><![CDATA[%dw 2.0
 output application/json
----
-payload map read( $, 'application/json')]]></ee:set-payload>
+&#45;&#45;-
+payload map read( $, 'application/json')&#93;&#93;></ee:set-payload>
 							</ee:message>
-						</ee:transform>
-						<scatter-gather doc:name="Scatter-Gather" doc:id="d84b6ff4-7bc7-42d0-952b-ab4fb64f8685" >
-							<route >
-								<ee:transform doc:name="Transform Message" doc:id="60708492-fc98-4b68-8532-439c80f488a3" >
-									<ee:message >
-										<ee:set-payload ><![CDATA[%dw 2.0
+						</ee:transform> [STUDIO] -->
+						<!-- [STUDIO:"Transform Message1"]<ee:transform doc:name="Transform Message1" doc:id="039161e4-cd89-4c2d-b762-8df695cdd9a3">
+							<ee:message />
+							<ee:variables>
+								<ee:set-variable variableName="createdata"><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload  filter ((item, index) -> item.Id == null) 
+&#93;&#93;></ee:set-variable>
+								<ee:set-variable variableName="updatedata"><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload 
+    filter ((item, index) -> item.Id != null) 
+&#93;&#93;></ee:set-variable>
+							</ee:variables>
+						</ee:transform> [STUDIO] -->
+						<logger level="INFO" doc:name="Logger" doc:id="eefc942e-4011-4453-b922-d15c6b31c12c" message='#["aggregated product"]'/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="8cc4323b-74aa-47e3-9794-8f5dbd5a5bdb" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
+		<logger level="INFO" doc:name="End Logger" doc:id="b07e6ca2-ce11-4e97-ac0c-067857a618a1" message='#[flatten(vars.errorIds ) filter ((item) -&gt; item != null)]'/>
+		<error-handler ref="global-error-handler"/>
+	</flow>
+	<sub-flow name="update_salesforce_Sub_Flow" doc:id="63714603-db86-4144-87b3-1d2be3630903" >
+									<logger level="INFO" doc:name="Logger" doc:id="c746ca17-3041-4734-927b-5fd63639174e" message='"salesforce update"' />
+								<!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message" doc:id="95a5e7e0-19b8-4536-991a-3f067d989567">
+									<ee:message>
+										<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload filter ((item, index) -> item.Id != null) 
+&#93;&#93;></ee:set-payload>
+									</ee:message>
+								</ee:transform> [STUDIO] -->
+								<ee:transform doc:name="Transform Message" doc:id="d7704fc5-b7a1-4ad9-ba61-c7bf2407fcfb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[payload ++ {"Id": (vars.sfresponse."Id"[0])} ]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:update doc:name="Update" doc:id="5ffcd99a-aa9b-4826-b2af-03c0bec350f7" config-ref="Salesforce_Config" type="Product2">
+								</salesforce:update>
+								<logger level="INFO" doc:name="Logger" doc:id="dbe7726c-d5eb-45d6-8daf-715005b73908" message="#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {Successful : payload.successful}&#10;else (payload.items map() -&gt; {&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]" />
+	</sub-flow>
+	<sub-flow name="create_salesforce_sub_Flow" doc:id="48517557-b548-463b-be92-bf29e884599f" >
+									<logger level="INFO" doc:name="Logger" doc:id="8db2aac6-1bec-45b5-8afa-ed7af4d9bcd3" message='"salesforce create"' />
+								<ee:transform doc:name="Transform Message" doc:id="17ced4fd-e51f-4bb3-8874-b9c53cea238c">
+									<ee:message>
+										<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-payload 
-    filter ((item, index) -> item.sfResponse != 1) 
-    map (item) -> item - "sfResponse"
+[payload]
 ]]></ee:set-payload>
 									</ee:message>
-									<ee:variables >
-										<ee:set-variable resource="dwl/var-createPB.dwl" variableName="createPB" />
+									<ee:variables>
 									</ee:variables>
 								</ee:transform>
-								<salesforce:create doc:name="Create" doc:id="c070ee01-aaf7-48b0-93b7-c23d3ad05a52" config-ref="Salesforce_Config" type="Product2">
+		<salesforce:create doc:name="Create" doc:id="21f0b1c4-1b1d-41d1-a783-bbbe778d699d" config-ref="Salesforce_Config" type="Product2">
 							</salesforce:create>
-								<logger level="INFO" doc:name="Logger" doc:id="2a63c786-7fce-4e6d-ae33-0d742cf1e81c" message="#[%dw 2.0&#10;output applicaiton/json&#10;---&#10;payload]" />
-								<ee:transform doc:name="Transform Message" doc:id="405cac14-f5a6-472a-a322-4b962b6d5039">
+								<logger level="INFO" doc:name="Logger" doc:id="3015cb33-f7a5-41aa-b7e4-6fd2fbb013fb" message="#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {Successful : payload.successful}&#10;else (payload.items map() -&gt; {&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]" />
+								<ee:transform doc:name="Transform Message" doc:id="95eec4ca-7a3e-4bc4-8c92-e1e3b62f06c5">
 									<ee:message>
 									</ee:message>
-									<ee:variables >
+									<ee:variables>
 										<ee:set-variable resource="dwl/var-product2id.dwl" variableName="product2id" />
 									</ee:variables>
 								</ee:transform>
-								<flow-ref doc:name="get-pricebook-id" doc:id="c89ae6aa-8910-403b-9e31-3c0bd8443574" name="get-pricebook-id"/>
-								<ee:transform doc:name="Transform Message" doc:id="d6a495a8-468f-4113-9822-e8bd37e92801" >
-									<ee:message >
-										<ee:set-payload ><![CDATA[%dw 2.0
+								<flow-ref doc:name="get-pricebook-id" doc:id="e876d101-3c22-49fa-afcf-d973ceab9ea9" name="get-pricebook-id" />
+								<ee:transform doc:name="Transform Message" doc:id="b442acb5-068f-454d-86de-12529a9766fa">
+									<ee:message>
+										<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 vars.createPB map (item, index) -> (
@@ -167,38 +250,13 @@ vars.createPB map (item, index) -> (
 })]]></ee:set-payload>
 									</ee:message>
 								</ee:transform>
-								<async doc:name="Async" doc:id="a941c997-50e1-46e8-a1f4-2debb8bd4692" >
-									<http:request method="POST" doc:id="6399901f-26d2-4661-bd0e-2f027dd45645" config-ref="HTTP_Request_configuration" path="${pricebooks.uri}" doc:name="Request" />
-									<logger level="INFO" doc:name="Logger" doc:id="9335b01e-0ee9-4665-a989-2b7d97d4cafe" message='#["Request to PriceBooks API Completed."]' />
+								<async doc:name="Async" doc:id="4b0034aa-c619-481a-8957-f166d73de81d">
+									<http:request method="POST" doc:id="f0a7e35e-da0e-4ec6-bee6-2fdb3eb07e77" config-ref="HTTP_Request_configuration" path="${pricebooks.uri}" doc:name="Request" />
+									<logger level="INFO" doc:name="Logger" doc:id="91653105-8dd0-4139-ac33-c8af8f5f1667" message='#["Request to PriceBooks API Completed."]' />
 								</async>
-							</route>
-							<route >
-								<ee:transform doc:name="Transform Message" doc:id="12c1e18d-f4a5-4026-a6ff-4af71a784c8d" >
-									<ee:message >
-										<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload 
-    filter ((item, index) -> item.sfResponse != 0) 
-    map (item) -> item - "sfResponse"
-]]></ee:set-payload>
-									</ee:message>
-								</ee:transform>
-								<salesforce:update doc:name="Update" doc:id="9c9617a3-312c-4934-aa47-9ee55f25427c" config-ref="Salesforce_Config" type="Product2">
-								</salesforce:update>
-								<logger level="INFO" doc:name="Logger" doc:id="eb1ea789-b377-49e4-ba3f-4e56b7046e3e" message="#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {Successful : payload.successful}&#10;else (payload.items map() -&gt; {&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]" />
-							</route>
-						</scatter-gather>
-					</batch:aggregator>
-				</batch:step>
-			</batch:process-records>
-			<batch:on-complete >
-				<logger level="INFO" doc:name="Logger" doc:id="8cc4323b-74aa-47e3-9794-8f5dbd5a5bdb" message="#[payload]"/>
-			</batch:on-complete>
-		</batch:job>
-		<logger level="INFO" doc:name="End Logger" doc:id="b07e6ca2-ce11-4e97-ac0c-067857a618a1" message='#[flatten(vars.errorIds ) filter ((item) -&gt; item != null)]'/>
-		<error-handler ref="global-error-handler"/>
-	</flow>
+	
+	
+	</sub-flow>
 	<sub-flow name="get-pricebook-id" doc:id="3be9a04f-af55-4ae2-825f-67e72f5553ef" >
 		<ee:transform doc:name="Transform Message" doc:id="22ad7221-bb69-4b4d-bbb8-ca2465db4b7e" >
 			<ee:message >
