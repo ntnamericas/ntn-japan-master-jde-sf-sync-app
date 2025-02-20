@@ -73,7 +73,7 @@ output application/java
 					<ee:transform doc:name="Transform Message" doc:id="600c8c1d-ccd6-45ef-9f5e-8c7799eb2c0c">
 								<ee:message>
 							<ee:set-payload><![CDATA[%dw 2.0
-output application/json
+output application/java
 ---
 {
   Part_Number__c : trim(payload.RCAA19),
@@ -100,7 +100,8 @@ output application/json
     Estimated_Production_Lead_Time_Max__c : "0.00",
     Estimated_Production_Lead_Time_Min__c : "0.00",
     IsActive: true as Boolean ,
-    Name: (trim(payload.RCAA19))
+    Name: (trim(payload.RCAA19)),
+    Update_Date__c : (payload.RCEVNTDATE as Date {format: "yyyyMMdd"}) as String {format: "yyyy-MM-dd"} as Date {format: "yyyy-MM-dd"}
 }
 ]]></ee:set-payload>
 								</ee:message>
@@ -207,6 +208,7 @@ output application/java
 [payload ++ {"Id": (vars.sfresponse."Id"[0])} ]]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="20128153-0732-4153-a826-c71a4170c845" message="#[payload]"/>
 		<salesforce:update doc:name="Update" doc:id="5ffcd99a-aa9b-4826-b2af-03c0bec350f7" config-ref="Salesforce_Config" type="Product2">
 								</salesforce:update>
 								<logger level="INFO" doc:name="Logger" doc:id="dbe7726c-d5eb-45d6-8daf-715005b73908" message="#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {Successful : payload.successful}&#10;else (payload.items map() -&gt; {&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]" />
@@ -224,6 +226,7 @@ output application/json
 									<ee:variables>
 									</ee:variables>
 								</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="7fb22d12-fa06-438e-9952-f63fa699266a" message="#[payload]"/>
 		<salesforce:create doc:name="Create" doc:id="21f0b1c4-1b1d-41d1-a783-bbbe778d699d" config-ref="Salesforce_Config" type="Product2">
 							</salesforce:create>
 								<logger level="INFO" doc:name="Logger" doc:id="3015cb33-f7a5-41aa-b7e4-6fd2fbb013fb" message="#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {Successful : payload.successful}&#10;else (payload.items map() -&gt; {&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]" />
