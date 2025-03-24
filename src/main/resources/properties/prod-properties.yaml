@@ -1,15 +1,21 @@
 sf:
-  user: "ntnmule@prowesssoft.com.muledev"
-  authURL : "https://ntnconnect--muledev.sandbox.my.salesforce.com/services/Soap/u/58.0"
+  user: "mulesoftintegration@ntnusa.com"
+  authURL : "https://login.salesforce.com/services/Soap/u/56.0"
+  URL: "https://ntnconnect.my.salesforce.com/services/oauth2/token"  
+  
+ #app name
+app:
+  name: "ntn-jpn-master-jde-sf-sync-app"  
+  env: "PROD"     
   
 db:
   host: "129.147.16.38"
   port: "1521"
   user: "c_mulesoft"
   service: "jdeorcl.netuenazr.vcnzgqox.oraclevcn.com"
-  countQuery: "SELECT COUNT(*) FROM PRDDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
+  countQuery: "SELECT COUNT(*) FROM PRODDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
   AND RCAA19 NOT LIKE '%#%'  AND RCI75MCHFD = 'Y'"
-  query: "SELECT  RCAA19 ,RC74USTA FROM PRDDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
+  query: "SELECT  RCAA19 ,RC74USTA FROM PRODDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
   AND RCAA19 NOT LIKE '%#%' AND RCI75MCHFD = 'Y'"
 
 pricebooks:
