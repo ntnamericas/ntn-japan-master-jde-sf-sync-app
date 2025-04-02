@@ -110,12 +110,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.mule.connectors</groupId>
-			<artifactId>mule-email-connector</artifactId>
-			<version>1.7.4</version>
-			<classifier>mule-plugin</classifier>
-		</dependency>
-		<dependency>
 			<groupId>com.mulesoft.munit</groupId>
 			<artifactId>munit-tools</artifactId>
 			<version>3.3.0</version>
@@ -145,6 +139,12 @@
 			<groupId>com.mulesoft.connectors</groupId>
 			<artifactId>mule-salesforce-connector</artifactId>
 			<version>10.22.9</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.mule.connectors</groupId>
+			<artifactId>mule-email-connector</artifactId>
+			<version>1.7.5</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
 	</dependencies>

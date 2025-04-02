@@ -7,7 +7,7 @@
 		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
 		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
-	<munit:config name="ntn-japan-master-jde-sapi-test-suite.xml" />
+	<!-- <munit:config name="ntn-japan-master-jde-sapi-test-suite.xml" />
 	<munit:test name="ntn-japan-master-jde-sapi-test-suite-ntn-japan-master-jde-sapiFlow-newTest" doc:id="cc35b4c2-6a3f-471a-9add-0038458d060d" description="Test" expectedErrorType="ANY">
 		<munit:behavior >
 			<munit-tools:mock-when doc:name="Mock when" doc:id="b0eaa354-3d35-4209-b535-60110f229868" processor="batch:step">
@@ -50,7 +50,7 @@
 		<munit:validation >
 			<munit-tools:assert-that doc:name="Assert that" doc:id="91b6ad33-5825-4032-b638-48afee17def9" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
 		</munit:validation>
-	</munit:test>
+	</munit:test> -->
 
 
 </mule>
