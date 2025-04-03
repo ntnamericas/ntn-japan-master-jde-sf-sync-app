@@ -236,7 +236,7 @@ skipNullOn="everywhere"
                 "div" @(class:"content"):{
                     "p": "Hi,",
                     "p": "Greetings!!!",
-					"p": "Please check the records attached"
+					"p": "Please check the Update JAPAN-Master records attached"
                 },
 
                 "div":{
@@ -276,7 +276,45 @@ payload.Create
 			<salesforce:records ><![CDATA[#[payload.Create]]]></salesforce:records>
 							</salesforce:create>
 								<logger level="INFO" doc:name="Logger" doc:id="3015cb33-f7a5-41aa-b7e4-6fd2fbb013fb" message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {&#10;  (payload."items" map() -&gt; {&#10;  "Workflow": "JPN Master Create",&#10;	product2Id: $.id,&#10;	message: "success : " ++ $.payload.success ++ ""&#10;})&#10;}&#10;else (payload.items map() -&gt; {&#10;  "Workflow": "JPN Master Create",&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
-								<ee:transform doc:name="map-product2id" doc:id="95eec4ca-7a3e-4bc4-8c92-e1e3b62f06c5">
+								<email:send doc:name="Send" doc:id="dfdc9ddf-2d91-4b8c-af8b-66cabbde740f" config-ref="Email_SMTP1" fromAddress="${secure::smtp.user}" subject="#[&quot;*** E-mail Notification: Kind Attention *** Payload from JAPAN-MASTER-INTERFACE  &quot; ++ p('app.name')]" toAddresses="#[p('smtp.to') splitBy &quot;,&quot;]">
+			<email:body contentType="text/html" encoding="UTF-8">
+				<email:content><![CDATA[#[%dw 2.0
+output application/xml
+skipNullOn="everywhere"
+
+---
+{
+    "html":{
+        "body":{
+            "div" @(class:"total"):{
+                "div" @(class:"header"):{
+                    "h2":"Alert from Mulesoft"
+                },
+                "div" @(class:"content"):{
+                    "p": "Hi,",
+                    "p": "Greetings!!!",
+					"p": "Please check the Create JAPAN-Master records attached"
+                },
+
+                "div":{
+                    "table" @(width:'40%', border:'1', cellspacing:'0'): {
+							"tr":{
+                                "th": "InterfaceName",
+                                "td": p('app.name')
+                            
+                            }                        
+				
+                        }
+                }
+            }
+        }
+    }
+}]]]></email:content>
+			</email:body>
+			<email:attachments><![CDATA[#[{
+	"payload.json": payload }]]]></email:attachments>
+		</email:send>
+		<ee:transform doc:name="map-product2id" doc:id="95eec4ca-7a3e-4bc4-8c92-e1e3b62f06c5">
 									<ee:message>
 									</ee:message>
 									<ee:variables>
