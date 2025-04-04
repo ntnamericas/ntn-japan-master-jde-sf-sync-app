@@ -28,4 +28,4 @@ pricebooks:
 smtp:
   host: "smtp.office365.com"
   port: "25"  
-  to: "simran.modi@prowesssoft.com"  
+  to: "simran.modi@prowesssoft.com,suman.chatterjee@prowesssoft.com"  

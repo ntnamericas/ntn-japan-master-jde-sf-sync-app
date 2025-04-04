@@ -14,6 +14,18 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+	
+	<email:smtp-config name="Email_SMTP2" doc:name="Email SMTP" doc:id="7d295bc7-fd48-4ab3-8f96-5c5befa6dba4" >
+		<email:smtp-connection host="smtp.office365.com" port="587" user="apps-noreply@prowesssoft.com" password="Admin@C0E">
+				<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+				<email:property key="mail.smtp.connectiontimeout" value="60000" />
+				<email:property key="mail.smtptimeout" value="60000" />
+				<email:property key="mail.smtp.writetimeout" value="60000" />
+				<email:property key="mail.debug" value="true" />
+			</email:properties>
+			</email:smtp-connection>
+	</email:smtp-config>
 	<flow name="ntn-japan-master-jde-sapiFlow-new" doc:id="578c10aa-2bf5-4b95-9baa-1d07c8c7d1f8" initialState="started">
 
 		<scheduler doc:name="Scheduler" doc:id="044f123d-8c62-4422-9421-1c91f4bb05a5" >
@@ -165,6 +177,7 @@ else null)
 							<ee:variables>
 							</ee:variables>
 						</ee:transform>
+						<logger level="INFO" doc:name="payload before Create/ Update of Japan-master" doc:id="54661264-5424-4f91-83cd-bd7c7508055a" message="#[payload]"/>
 						<flow-ref doc:name="create-update-products-subflow" doc:id="3b4a23e5-9119-4f88-83ac-05aed38a5b09" name="create-update-products-subflow"/>
 						<logger level="INFO" doc:name="Logger" doc:id="c4feae24-9065-48de-a81c-59d1b8624f9a" message='#["/n Batch Aggregator Completed"]'/>
 					</batch:aggregator>
@@ -211,17 +224,33 @@ else null)
 									<logger level="INFO" doc:name="Logger" doc:id="c746ca17-3041-4734-927b-5fd63639174e" message='"salesforce update"' />
 								<ee:transform doc:name="create-payload-for-bulk-update" doc:id="37358c8a-3983-4fda-ae96-0830b8c7e3b8" >
 			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="updatePayload" ><![CDATA[%dw 2.0
 output application/csv lineSeparator="\n"
 ---
-payload.Update map (item) -> (item)]]></ee:set-payload>
-			</ee:message>
+payload.Update map (item) -> (item)]]></ee:set-variable>
+			</ee:variables>
 		</ee:transform>
-		<salesforce:create-job-bulk-api-v2 doc:name="update-via-bulk-api-v2" doc:id="d5537765-f7af-41c2-a5c5-481906fb31ba" config-ref="Salesforce_Config" objectType="Product2" operation="update" externalIdFieldName="External_ID__c"/>
-		<logger level="INFO" doc:name="payload to send on email" doc:id="dbe7726c-d5eb-45d6-8daf-715005b73908" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{"payload to send on email" : payload}]' />
-		<email:send doc:name="Send" doc:id="0d767b32-00ca-418c-bfa4-7659b518cb20" config-ref="Email_SMTP1" fromAddress="${secure::smtp.user}" subject="#[&quot;*** E-mail Notification: Kind Attention *** Payload from JAPAN-MASTER-INTERFACE  &quot; ++ p('app.name')]" toAddresses="#[p('smtp.to') splitBy &quot;,&quot;]">
+		<try doc:name="Try" doc:id="fe4eb6db-ff29-4150-a1fe-db7e3ed0715a" >
+			<salesforce:create-job-bulk-api-v2 doc:name="update-via-bulk-api-v2" doc:id="d5537765-f7af-41c2-a5c5-481906fb31ba" config-ref="Salesforce_Config" objectType="Product2" operation="update" externalIdFieldName="External_ID__c">
+			<salesforce:s-objects><![CDATA[#[vars.updatePayload]]]></salesforce:s-objects>
+		</salesforce:create-job-bulk-api-v2>
+			<error-handler ref="global-error-handler" />
+		</try>
+		<ee:transform doc:name="Transform Message" doc:id="26d46263-a978-4a9a-b780-0605b9469bfd" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="updateResponse" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<email:send doc:name="Send" doc:id="0d767b32-00ca-418c-bfa4-7659b518cb20" config-ref="Email_SMTP2" subject="#[&quot;E-mail Notification:&quot; ++  p('app.env') ++ &quot;*** JAPAN-MASTER Update Report for : &quot; ++ p('app.name') ++ p('app.env')]" toAddresses="#[p('smtp.to') splitBy &quot;,&quot;]" fromAddress="apps-noreply@prowesssoft.com">
 			<email:body contentType="text/html" encoding="UTF-8">
-				<email:content ><![CDATA[#[%dw 2.0
+				<email:content><![CDATA[#[%dw 2.0
 output application/xml
 skipNullOn="everywhere"
 
@@ -230,33 +259,25 @@ skipNullOn="everywhere"
     "html":{
         "body":{
             "div" @(class:"total"):{
-                "div" @(class:"header"):{
-                    "h2":"Alert from Mulesoft"
-                },
+
                 "div" @(class:"content"):{
                     "p": "Hi,",
                     "p": "Greetings!!!",
-					"p": "Please check the Update JAPAN-Master records attached"
-                },
-
-                "div":{
-                    "table" @(width:'40%', border:'1', cellspacing:'0'): {
-							"tr":{
-                                "th": "InterfaceName",
-                                "td": p('app.name')
-                            
-                            }                        
-				
-                        }
+					"p": "Please check the UPDATE JAPAN-Master records attached",
+                }
                 }
             }
         }
-    }
-}]]]></email:content>
+    }]]]></email:content>
 				</email:body>
-			<email:attachments ><![CDATA[#[{
-	"payload.json": payload }]]]></email:attachments>
+			<email:attachments><![CDATA[#[%dw 2.0
+output application/csv
+---
+{
+	"updatePayload.csv": vars.updatePayload,
+	"updateResponse.json" : vars.updateResponse }]]]></email:attachments>
 			</email:send>
+		<logger level="INFO" doc:name="payload to send on email" doc:id="dbe7726c-d5eb-45d6-8daf-715005b73908" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{"payload to send on email" : payload}]' />
 		
 	</sub-flow>
 	<sub-flow name="create_salesforce_sub_Flow" doc:id="48517557-b548-463b-be92-bf29e884599f" >
@@ -272,11 +293,37 @@ payload.Create
 ]]></ee:set-variable>
 									</ee:variables>
 								</ee:transform>
-		<salesforce:create doc:name="Create" doc:id="21f0b1c4-1b1d-41d1-a783-bbbe778d699d" config-ref="Salesforce_Config" type="Product2">
-			<salesforce:records ><![CDATA[#[payload.Create]]]></salesforce:records>
+								<try doc:name="Try" doc:id="2601ff0a-3873-42a4-8b27-e932efde2db8" >
+			<salesforce:create doc:name="Create" doc:id="21f0b1c4-1b1d-41d1-a783-bbbe778d699d" config-ref="Salesforce_Config" type="Product2">
+			<salesforce:records><![CDATA[#[payload.Create]]]></salesforce:records>
 							</salesforce:create>
-								<logger level="INFO" doc:name="Logger" doc:id="3015cb33-f7a5-41aa-b7e4-6fd2fbb013fb" message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {&#10;  (payload."items" map() -&gt; {&#10;  "Workflow": "JPN Master Create",&#10;	product2Id: $.id,&#10;	message: "success : " ++ $.payload.success ++ ""&#10;})&#10;}&#10;else (payload.items map() -&gt; {&#10;  "Workflow": "JPN Master Create",&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
-								<email:send doc:name="Send" doc:id="dfdc9ddf-2d91-4b8c-af8b-66cabbde740f" config-ref="Email_SMTP1" fromAddress="${secure::smtp.user}" subject="#[&quot;*** E-mail Notification: Kind Attention *** Payload from JAPAN-MASTER-INTERFACE  &quot; ++ p('app.name')]" toAddresses="#[p('smtp.to') splitBy &quot;,&quot;]">
+			<error-handler ref="global-error-handler" />
+		</try>
+		<ee:transform doc:name="Transform Message" doc:id="42353ea3-85f7-4552-be57-803a00af9327" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="createResponse" ><![CDATA[%dw 2.0
+output application/json
+//var externalIds = testVar.Update.External_ID__c
+---
+if (payload.successful == true) {Successful : payload.items map ((item, index) -> {
+ 
+    Id: item.id,
+    Status: item.successful
+ 
+} )}
+else (payload.items filter ((item, index) -> item.exception != null) map(item,index) -> {
+	"MessageSender": "Create JAPAN-MASTER Records Failed",
+	failedId: item.id,
+  	"Status Code": item.statusCode default "No Status Code Received from Salesforce",
+	message: item.exception.message default "No Error Message Received from Salesforce",
+  	payload: if(item.statusCode != "DUPLICATE VALUE") (vars.createPB filter ((item1, index) -> item1.id == item.id) map ((filteredItem) -> filteredItem) ) else ""
+	
+})]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<email:send doc:name="Send" doc:id="dfdc9ddf-2d91-4b8c-af8b-66cabbde740f" config-ref="Email_SMTP2" fromAddress="apps-noreply@prowesssoft.com" subject="#[&quot;*** E-mail Notification:&quot;++ p('app.env')++ &quot;*** JAPAN-MASTER Create Report for : &quot; ++ p('app.name') ++&quot;-&quot; ++ p('app.env')]" toAddresses="#[p('smtp.to') splitBy &quot;,&quot;]">
 			<email:body contentType="text/html" encoding="UTF-8">
 				<email:content><![CDATA[#[%dw 2.0
 output application/xml
@@ -287,33 +334,25 @@ skipNullOn="everywhere"
     "html":{
         "body":{
             "div" @(class:"total"):{
-                "div" @(class:"header"):{
-                    "h2":"Alert from Mulesoft"
-                },
+
                 "div" @(class:"content"):{
                     "p": "Hi,",
                     "p": "Greetings!!!",
 					"p": "Please check the Create JAPAN-Master records attached"
-                },
-
-                "div":{
-                    "table" @(width:'40%', border:'1', cellspacing:'0'): {
-							"tr":{
-                                "th": "InterfaceName",
-                                "td": p('app.name')
-                            
-                            }                        
-				
-                        }
+                }
                 }
             }
         }
-    }
-}]]]></email:content>
+    }]]]></email:content>
 			</email:body>
-			<email:attachments><![CDATA[#[{
-	"payload.json": payload }]]]></email:attachments>
+			<email:attachments><![CDATA[#[%dw 2.0
+output application/csv
+---
+{
+	"createPB.csv": vars.createPB,
+	 "createResponse.json" : vars.createResponse }]]]></email:attachments>
 		</email:send>
+		<logger level="INFO" doc:name="Logger" doc:id="3015cb33-f7a5-41aa-b7e4-6fd2fbb013fb" message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {&#10;  (payload."items" map() -&gt; {&#10;  "Workflow": "JPN Master Create",&#10;	product2Id: $.id,&#10;	message: "success : " ++ $.payload.success ++ ""&#10;})&#10;}&#10;else (payload.items map() -&gt; {&#10;  "Workflow": "JPN Master Create",&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
 		<ee:transform doc:name="map-product2id" doc:id="95eec4ca-7a3e-4bc4-8c92-e1e3b62f06c5">
 									<ee:message>
 									</ee:message>
@@ -360,7 +399,10 @@ payload]]]></http:body>
 				<ee:set-payload resource="dwl/priceBooks.dwl" />
 			</ee:message>
 		</ee:transform>
-		<salesforce-composite:execute-composite-request doc:name="Execute composite request" doc:id="efdb93fa-a272-4a4f-a42e-b34321c12fd2" config-ref="Salesforce_Composite_Config" />
+		<try doc:name="Try" doc:id="a09aff0e-5285-4daf-81d0-ba796693f231" >
+			<salesforce-composite:execute-composite-request doc:name="Execute composite request" doc:id="efdb93fa-a272-4a4f-a42e-b34321c12fd2" config-ref="Salesforce_Composite_Config" />
+			<error-handler ref="global-error-handler" />
+		</try>
 		<ee:transform doc:name="Transform Message" doc:id="4bf78030-17a2-4d3c-bac8-1fb3d2830d5d" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
