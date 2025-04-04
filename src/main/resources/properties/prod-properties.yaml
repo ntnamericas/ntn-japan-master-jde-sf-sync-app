@@ -14,9 +14,9 @@ db:
   user: "c_mulesoft"
   service: "jdeorcl.netuenazr.vcnzgqox.oraclevcn.com"
   countQuery: "SELECT COUNT(*) FROM PRODDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
-  AND RCAA19 NOT LIKE '%#%'  AND RCI75MCHFD = 'Y'"
+  AND RCAA19 LIKE '%#%'  AND RCI75MCHFD = 'Y'"
   query: "SELECT  RCAA19 ,RC74USTA FROM PRODDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
-  AND RCAA19 NOT LIKE '%#%' AND RCI75MCHFD = 'Y'"
+  AND RCAA19 LIKE '%#%' AND RCI75MCHFD = 'Y'"
 
 pricebooks:
   host: "ntn-pricebooks-jde-sf-sync-app-prod-xbmlkc.xryhvh.usa-e2.cloudhub.io"
