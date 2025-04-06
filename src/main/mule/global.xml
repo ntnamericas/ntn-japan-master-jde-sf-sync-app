@@ -30,8 +30,8 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="584ce206-5a8f-424a-969e-93bc7cce6da6" basePath="${pricebooks.basePath}" >
 		<http:request-connection host="${pricebooks.host}" port="${pricebooks.port}" protocol="HTTPS"/>
 	</http:request-config>
-		<email:smtp-config name="Email_SMTP1"
-		doc:name="Email SMTP" doc:id="4fa91ca3-4676-4d2a-a4cd-1f9da663e774">
+		<email:smtp-config name="NTN_SMTP"
+		doc:name="Email SMTP" doc:id="4fa91ca3-4676-4d2a-a4cd-1f9da663e774" from="${secure::smtp.user}">
 		<email:smtp-connection host="${smtp.host}"
 			port="${smtp.port}" user="${secure::smtp.user}"
 			password="${secure::smtp.password}">

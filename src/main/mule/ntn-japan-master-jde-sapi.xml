@@ -14,18 +14,6 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
-	
-	<email:smtp-config name="Email_SMTP2" doc:name="Email SMTP" doc:id="7d295bc7-fd48-4ab3-8f96-5c5befa6dba4" >
-		<email:smtp-connection host="smtp.office365.com" port="587" user="apps-noreply@prowesssoft.com" password="Admin@C0E">
-				<email:properties >
-				<email:property key="mail.smtp.starttls.enable" value="true" />
-				<email:property key="mail.smtp.connectiontimeout" value="60000" />
-				<email:property key="mail.smtptimeout" value="60000" />
-				<email:property key="mail.smtp.writetimeout" value="60000" />
-				<email:property key="mail.debug" value="true" />
-			</email:properties>
-			</email:smtp-connection>
-	</email:smtp-config>
 	<flow name="ntn-japan-master-jde-sapiFlow-new" doc:id="578c10aa-2bf5-4b95-9baa-1d07c8c7d1f8" initialState="started">
 
 		<scheduler doc:name="Scheduler" doc:id="044f123d-8c62-4422-9421-1c91f4bb05a5" >
@@ -55,7 +43,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 		<db:select doc:name="Select" doc:id="872014a1-a651-486d-8d3e-7198b280e6ea" config-ref="db_config" fetchSize="#[vars.count[0].'COUNT(*)']" maxRows="#[vars.count[0].'COUNT(*)']">
 			<db:sql><![CDATA[#[vars.query]]]></db:sql>
 		</db:select>
-		<logger level="DEBUG" doc:name="Logger" doc:id="7842c0de-0bc6-4a00-889e-a775f1de0ef1" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" />
+		<logger level="DEBUG" doc:name="Logger" doc:id="7842c0de-0bc6-4a00-889e-a775f1de0ef1" message="#[%dw 2.0&#10;output application/json indent=false&#10;---&#10;payload]" />
 		<logger level="INFO" doc:name="Logger" doc:id="cfc10191-6a9f-4de5-9c15-fa2526db17a8" message='#["\n Actual Values for JAPAN MASTER fetched from the Database"]'/>
 		<ee:transform doc:name="Transform Message" doc:id="fada2861-0b1f-4418-9f3e-b4a77afcc82b" >
 			<ee:message >
@@ -179,11 +167,11 @@ else null)
 							<ee:variables>
 							</ee:variables>
 						</ee:transform>
-						<logger level="INFO" doc:name="payload before Create/ Update of Japan-master" doc:id="54661264-5424-4f91-83cd-bd7c7508055a" message="#[payload]"/>
+						<logger level="DEBUG" doc:name="payload before Create/ Update of Japan-master" doc:id="54661264-5424-4f91-83cd-bd7c7508055a" message="#[%dw 2.0&#10;output application/json indent=false&#10;---&#10;payload]"/>
 						<flow-ref doc:name="create-update-products-subflow" doc:id="3b4a23e5-9119-4f88-83ac-05aed38a5b09" name="create-update-products-subflow"/>
 						<logger level="INFO" doc:name="Logger" doc:id="c4feae24-9065-48de-a81c-59d1b8624f9a" message='#["/n Batch Aggregator Completed"]'/>
 					</batch:aggregator>
-					<logger level="DEBUG" doc:name="Logger" doc:id="c87f294d-44cc-4e37-a126-04a3dedd2cb2" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{Id : payload.data.Id default "",&#10; External_Id__c : payload.data.External_ID__c,&#10; Operation : payload.operation,&#10; "Log Step" : "Before Batch Aggregator"&#10;}]'/>
+					<logger level="INFO" doc:name="Logger" doc:id="c87f294d-44cc-4e37-a126-04a3dedd2cb2" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{Id : payload.data.Id default "",&#10; External_Id__c : payload.data.External_ID__c,&#10; Operation : payload.operation,&#10; "Log Step" : "Before Batch Aggregator"&#10;}]'/>
 				</batch:step>
 			</batch:process-records>
 			<batch:on-complete >
@@ -279,7 +267,7 @@ payload]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
 		<async doc:name="Async" doc:id="ab239847-d74f-4caa-8124-6f5284669901" >
-			<email:send doc:name="Send" doc:id="0d767b32-00ca-418c-bfa4-7659b518cb20" config-ref="Email_SMTP2" subject="#[&quot;E-mail Notification:&quot; ++  p('app.env') ++ &quot;*** JAPAN-MASTER Update Report for : &quot; ++ p('app.name')  ++&quot;-&quot; ++ p('app.env')]" toAddresses="#[p('smtp.to') splitBy &quot;,&quot;]" fromAddress="apps-noreply@prowesssoft.com">
+			<email:send doc:name="Send" doc:id="0d767b32-00ca-418c-bfa4-7659b518cb20" subject="#[&quot;E-mail Notification:&quot; ++  p('app.env') ++ &quot;*** JAPAN-MASTER Update Report for : &quot; ++ p('app.name')  ++&quot;-&quot; ++ p('app.env')]" toAddresses="#[p('smtp.to') splitBy &quot;,&quot;]" config-ref="NTN_SMTP">
 			<email:body contentType="text/html" encoding="UTF-8">
 				<email:content><![CDATA[#[%dw 2.0
 output application/xml
@@ -357,7 +345,7 @@ else (payload.items filter ((item, index) -> item.exception != null) map(item,in
 			</ee:variables>
 		</ee:transform>
 		<async doc:name="Async" doc:id="b3bb02e5-cd90-404b-b66d-9c989d1f32b2" >
-			<email:send doc:name="Send" doc:id="dfdc9ddf-2d91-4b8c-af8b-66cabbde740f" config-ref="Email_SMTP2" fromAddress="apps-noreply@prowesssoft.com" subject="#[&quot;*** E-mail Notification:&quot;++ p('app.env')++ &quot;*** JAPAN-MASTER Create Report for : &quot; ++ p('app.name') ++&quot;-&quot; ++ p('app.env')]" toAddresses="#[p('smtp.to') splitBy &quot;,&quot;]">
+			<email:send doc:name="Send" doc:id="dfdc9ddf-2d91-4b8c-af8b-66cabbde740f" subject="#[&quot;*** E-mail Notification:&quot;++ p('app.env')++ &quot;*** JAPAN-MASTER Create Report for : &quot; ++ p('app.name') ++&quot;-&quot; ++ p('app.env')]" toAddresses="#[p('smtp.to') splitBy &quot;,&quot;]" config-ref="NTN_SMTP">
 			<email:body contentType="text/html" encoding="UTF-8">
 				<email:content><![CDATA[#[%dw 2.0
 output application/xml

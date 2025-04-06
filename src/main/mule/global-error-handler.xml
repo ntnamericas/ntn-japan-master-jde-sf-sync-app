@@ -19,7 +19,7 @@ output application/java
 }]]></ee:set-payload>
 				</ee:message>
 			</ee:transform>
-			<email:send doc:name="Send" doc:id="4ef65f4c-80df-40fb-bc49-8f98cc3f61b2" config-ref="Email_SMTP1" toAddresses="#[p('smtp.to') splitBy &quot;,&quot;]" fromAddress="${secure::smtp.user}" subject="#[&quot;*** E-mail Notification: &quot; ++ p('app.env') ++ &quot; Kind Attention *** Error Alert in  &quot; ++ p('app.name')]">
+			<email:send doc:name="Send" doc:id="4ef65f4c-80df-40fb-bc49-8f98cc3f61b2" config-ref="NTN_SMTP" toAddresses="#[p('smtp.to') splitBy &quot;,&quot;]" subject="#[&quot;*** E-mail Notification: &quot; ++ p('app.env') ++ &quot; Kind Attention *** Error Alert in  &quot; ++ p('app.name')]">
 				<email:body contentType="text/html" encoding="UTF-8">
 					<email:content ><![CDATA[#[%dw 2.0
 output application/xml
