@@ -1,13 +1,11 @@
 #DB config details
 db:
-  password: "![uMrGHbWyEL54QEMh+18S/A==]"
-  
+  password: "![uMrGHbWyEL54QEMh+18S/A==]" 
 
 #ntn web service details
 sf:
   password : "![hRt1ri9KnH5UalfO4hI4Vg==]"
-  token : "![1O3V3uqG9wtByGHznFQhsc1Q4BYp3HsPQbnzOU3Ieso=]" 
-
+  token : "![1O3V3uqG9wtByGHznFQhsc1Q4BYp3HsPQbnzOU3Ieso=]"
   
 smtp:
   user: "![hRt1ri9KnH7VngaJcayGZ0D8arLBERHy1f3i+Ca4XPI=]"
