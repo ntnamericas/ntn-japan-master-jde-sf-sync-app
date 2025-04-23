@@ -23,7 +23,6 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="ea4df38c-c260-47cc-802f-aed4ab77c0bb" file="properties/${env}-secure-properties.yaml" key="${encrypt.key}" >
 		<secure-properties:encrypt algorithm="Blowfish" />
 	</secure-properties:config>
-	<global-property doc:name="Global Property" doc:id="ed042570-79c1-4311-b639-58cc3df6d7f1" name="encrypt.key" value="secure12345" />
 	<salesforce-composite:composite-config name="Salesforce_Composite_Config" doc:name="Salesforce Composite Config" doc:id="2f0ec4cd-be27-4df7-8443-bc71d29ba480" >
 		<salesforce-composite:oauth-user-pass-connection consumerKey="${secure::sf.key}" consumerSecret="${secure::sf.secret}" username="${sf.user}" password="${secure::sf.password}" securityToken="${secure::sf.token}" tokenEndpoint="${sf.URL}"/>
 	</salesforce-composite:composite-config>

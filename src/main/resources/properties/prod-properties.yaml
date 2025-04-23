@@ -25,4 +25,4 @@ pricebooks:
 smtp:
   host: "smtp.office365.com"
   port: "25"  
-  to: "donotreply@ntnusa.com,ntnmule@prowesssoft.com"  
+  to: "donotreply@ntnusa.com,ntnmule@prowesssoft.com,suman.chatterjee@prowesssoft.com"  

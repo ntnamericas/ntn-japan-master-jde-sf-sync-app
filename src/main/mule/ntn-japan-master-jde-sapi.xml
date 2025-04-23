@@ -55,7 +55,7 @@ payload]]></ee:set-payload>
 				<ee:set-variable variableName="RCAA19" ><![CDATA[""]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<batch:job jobName="ntn-japan-master-jde-sapi-Batch_Job" doc:id="45d0a331-3f41-4368-b322-914f3ad26573" blockSize="1000">
+		<batch:job jobName="ntn-japan-master-jde-sapi-Batch_Job" doc:id="45d0a331-3f41-4368-b322-914f3ad26573" blockSize="1000" maxFailedRecords="-1">
 			<batch:process-records >
 				<batch:step name="Batch_Step" doc:id="6686045f-2adf-4835-a6ae-f70e7dde832a" >
 					<ee:transform doc:name="Transform Message" doc:id="61c993e6-60df-48f1-adfe-ea289da4c542">
@@ -140,6 +140,9 @@ output application/json
 							</choice>
 						</otherwise>
 					</choice>
+					<async doc:name="Async" doc:id="fe4da070-f4c6-4aaf-a95e-8f6dbc10f4f1" >
+						<logger level="INFO" doc:name="Logger" doc:id="c87f294d-44cc-4e37-a126-04a3dedd2cb2" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{Id : payload.data.Id default "",&#10; External_Id__c : payload.data.External_ID__c,&#10; Operation : payload.operation,&#10; "Log Step" : "Before Batch Aggregator"&#10;}]' />
+					</async>
 					<batch:aggregator doc:name="Batch Aggregator" doc:id="7d97a256-8961-487c-b72b-84af97e25912" size="200">
 						<!-- [STUDIO:"Logger"]<logger level="INFO" doc:name="Logger" doc:id="3fea3308-9f66-4dc4-a9b6-d3e165ef7563" message="#[%dw 2.0&#10;output application/json&#10;&#45;&#45;-&#10;payload&#93;"/> [STUDIO] -->
 						<ee:transform doc:name="Transform Message" doc:id="d797e419-94da-4c2c-8bb9-91da745db269">
@@ -167,11 +170,12 @@ else null)
 							<ee:variables>
 							</ee:variables>
 						</ee:transform>
-						<logger level="DEBUG" doc:name="payload before Create/ Update of Japan-master" doc:id="54661264-5424-4f91-83cd-bd7c7508055a" message="#[%dw 2.0&#10;output application/json indent=false&#10;---&#10;payload]"/>
+						<async doc:name="Async" doc:id="e64cc185-fa1e-4c84-8a7c-f766ac4b3006" >
+							<logger level="DEBUG" doc:name="payload before Create/ Update of Japan-master" doc:id="54661264-5424-4f91-83cd-bd7c7508055a" message="#[%dw 2.0&#10;output application/json indent=false&#10;---&#10;payload]" />
+						</async>
 						<flow-ref doc:name="create-update-products-subflow" doc:id="3b4a23e5-9119-4f88-83ac-05aed38a5b09" name="create-update-products-subflow"/>
 						<logger level="INFO" doc:name="Logger" doc:id="c4feae24-9065-48de-a81c-59d1b8624f9a" message='#["/n Batch Aggregator Completed"]'/>
 					</batch:aggregator>
-					<logger level="INFO" doc:name="Logger" doc:id="c87f294d-44cc-4e37-a126-04a3dedd2cb2" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{Id : payload.data.Id default "",&#10; External_Id__c : payload.data.External_ID__c,&#10; Operation : payload.operation,&#10; "Log Step" : "Before Batch Aggregator"&#10;}]'/>
 				</batch:step>
 			</batch:process-records>
 			<batch:on-complete >
