@@ -7,5 +7,18 @@ db:
   port: "1521"
   user: "c_mulesoft"
   service: "jdorcldv.netjiuwoz.vcnzgqox.oraclevcn.com"
-  
+  countQuery: "SELECT COUNT(*) FROM TESTDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
+  AND RCAA19 NOT LIKE '%#%'  AND RCI75MCHFD = 'Y'"
+  query: "SELECT  RCAA19 ,RC74USTA FROM TESTDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
+  AND RCAA19 NOT LIKE '%#%' AND RCI75MCHFD = 'Y'"
 
+pricebooks:
+  host: "ntn-pricebooks-jde-sf-sync-app-dev-tpw8fz.89unfu.usa-e2.cloudhub.io"
+  port: "443"
+  basePath : "/api/"
+  uri : "pricebooks" 
+
+smtp:
+  host: "smtp.office365.com"
+  port: "25"  
+  to: "simran.modi@prowesssoft.com"  

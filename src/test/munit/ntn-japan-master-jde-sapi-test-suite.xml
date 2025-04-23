@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<!-- <munit:config name="ntn-japan-master-jde-sapi-test-suite.xml" />
+	<munit:test name="ntn-japan-master-jde-sapi-test-suite-ntn-japan-master-jde-sapiFlow-newTest" doc:id="cc35b4c2-6a3f-471a-9add-0038458d060d" description="Test" expectedErrorType="ANY">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="b0eaa354-3d35-4209-b535-60110f229868" processor="batch:step">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Batch_Step" attributeName="name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="632252e4-758a-45c1-b1bb-f48d92da25b2" processor="salesforce:query">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Query" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="SALESFORCE:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="ec0e6248-69ec-429b-807b-c4eccdf2e0ba" processor="batch:aggregator">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Batch Aggregator" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to ntn-japan-master-jde-sapiFlow-new" doc:id="ce4d9ea7-1a00-4914-ab39-8021f28a2f7e" name="ntn-japan-master-jde-sapiFlow-new"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="a779b53c-085e-4356-8889-7b480e84be20" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ntn-japan-master-jde-sapi-test-suite-get-pricebook-idTest" doc:id="e3c750c0-7e48-4456-b7db-08f1ebe89cad" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="77e5c271-f9d2-4864-a006-8034d681effa" processor="salesforce-composite:execute-composite-request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Execute composite request" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get-pricebook-id" doc:id="fe594d99-7d18-407d-b961-118a28c65dc1" name="get-pricebook-id"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="91b6ad33-5825-4032-b638-48afee17def9" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test> -->
+
+
+</mule>

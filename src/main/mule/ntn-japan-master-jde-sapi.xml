@@ -1,162 +1,443 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
-	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:salesforce-composite="http://www.mulesoft.org/schema/mule/salesforce-composite"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
-http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+	<flow name="ntn-japan-master-jde-sapiFlow-new" doc:id="578c10aa-2bf5-4b95-9baa-1d07c8c7d1f8" initialState="started">
 
-	<flow name="ntn-japan-master-jde-sapiFlow" doc:id="578c10aa-2bf5-4b95-9baa-1d07c8c7d1f8" initialState="started">
 		<scheduler doc:name="Scheduler" doc:id="044f123d-8c62-4422-9421-1c91f4bb05a5" >
 			<scheduling-strategy >
-				<fixed-frequency timeUnit="MINUTES" frequency="2"/>
+				<fixed-frequency timeUnit="DAYS" frequency="2"/>
 			</scheduling-strategy>
 		</scheduler>		
-		<logger level="INFO" doc:name="start logger of ntn-japan-master-jde-sapi-flow" doc:id="54fc93c3-c802-48c5-9e74-cd66f6355504" message='"start logger of ntn-japan-master-jde-sapi-flow"'/>
+		<logger level="INFO" doc:name="start logger of ntn-japan-master-jde-sapi-flow" doc:id="54fc93c3-c802-48c5-9e74-cd66f6355504" message='#["start logger of ntn-japan-master-jde-sapi-flow"]'/>
 		<ee:transform doc:name="Transform Message" doc:id="50f6df35-f90a-48e7-9a1c-abd895d00196" >
 			<ee:message >
 			</ee:message>
 			<ee:variables >
-				<ee:set-variable variableName="countQuery" ><![CDATA["SELECT COUNT(*) FROM TESTDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
-  AND RCAA19 NOT LIKE '%#%'  AND RCI75MCHFD = 'Y'"
-
-//" Select COUNT(*) from TESTDTA.F57JPNPM where RCAA19 like 'Z1%' "]]></ee:set-variable>
+				<ee:set-variable variableName="countQuery" ><![CDATA[p('db.countQuery')]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
 		<db:select doc:name="Select" doc:id="ab2b5311-fb5e-44cb-8030-7a28c029573e" config-ref="db_config" target="count">
 			<db:sql ><![CDATA[#[vars.countQuery]]]></db:sql>
 		</db:select>
+		<logger level="INFO" doc:name="Logger" doc:id="6cfc0e96-e57e-4f7e-a8f3-555fcf7679c8" message='#[%dw 2.0&#10;output application/json&#10;---&#10;["JAPAN MASTER Result Sets Received From JDE: "] ++ vars.count]'/>
 		<ee:transform doc:name="Transform Message" doc:id="12afbe70-ebaf-47ad-a972-3464dc3a19cc">
 					<ee:message>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="query"><![CDATA["SELECT  RCAA19 ,RC74USTA FROM TESTDTA.F57JPNPM WHERE RCAA19 NOT LIKE '#%' 
- AND RCAA19 NOT LIKE '%#%' AND RCI75MCHFD = 'Y'"
-// "Select RCAA19 ,RC74USTA from TESTDTA.F57JPNPM where RCAA19 like 'Z1%' "]]></ee:set-variable>
+						<ee:set-variable variableName="query"><![CDATA[p('db.query')]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
-		<db:select doc:name="Select" doc:id="872014a1-a651-486d-8d3e-7198b280e6ea" config-ref="db_config" target="dbresponse" fetchSize="#[vars.count[0].'COUNT(*)']" maxRows="#[vars.count[0].'COUNT(*)']">
+		<db:select doc:name="Select" doc:id="872014a1-a651-486d-8d3e-7198b280e6ea" config-ref="db_config" fetchSize="#[vars.count[0].'COUNT(*)']" maxRows="#[vars.count[0].'COUNT(*)']">
 			<db:sql><![CDATA[#[vars.query]]]></db:sql>
 		</db:select>
+		<logger level="DEBUG" doc:name="Logger" doc:id="7842c0de-0bc6-4a00-889e-a775f1de0ef1" message="#[%dw 2.0&#10;output application/json indent=false&#10;---&#10;payload]" />
+		<logger level="INFO" doc:name="Logger" doc:id="cfc10191-6a9f-4de5-9c15-fa2526db17a8" message='#["\n Actual Values for JAPAN MASTER fetched from the Database"]'/>
 		<ee:transform doc:name="Transform Message" doc:id="fada2861-0b1f-4418-9f3e-b4a77afcc82b" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[output application/json
 ---
-vars.dbresponse]]></ee:set-payload>
+payload]]></ee:set-payload>
 			</ee:message>
 			<ee:variables >
 				<ee:set-variable variableName="RCAA19" ><![CDATA[""]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="7842c0de-0bc6-4a00-889e-a775f1de0ef1" message="#[payload]" />
-		<foreach doc:name="For Each" doc:id="d46d42fa-ad4a-4a21-b4ea-6eb59cfc9944" >
-			<ee:transform doc:name="Transform Message" doc:id="61c993e6-60df-48f1-adfe-ea289da4c542">
+		<batch:job jobName="ntn-japan-master-jde-sapi-Batch_Job" doc:id="45d0a331-3f41-4368-b322-914f3ad26573" blockSize="1000" maxFailedRecords="-1">
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="6686045f-2adf-4835-a6ae-f70e7dde832a" >
+					<ee:transform doc:name="Transform Message" doc:id="61c993e6-60df-48f1-adfe-ea289da4c542">
 						<ee:message>
 						</ee:message>
 						<ee:variables>
 							<ee:set-variable variableName="query"><![CDATA[%dw 2.0
 output application/java
+var cleanedPartNumber = (payload.RCAA19 default "") replace " " with ""
+var externalId = trim(payload.RCAA19 default "") ++ "-JPN-NTN"
 ---
-"SELECT Part_Number__c, Id ,Name FROM Product2 WHERE Part_Number__c = " ++ "'" ++(payload."RCAA19" replace " " with ("") ) ++ "'"]]></ee:set-variable>
-					<ee:set-variable variableName="errorIds" ><![CDATA[[] + vars.errorIds default {}]]></ee:set-variable>
+"SELECT Part_Number__c, Id, Name FROM Product2 WHERE  External_ID__c = '" ++ externalId ++ "'"
+]]></ee:set-variable>
+							<ee:set-variable variableName="cleanedPartNumber" ><![CDATA[%dw 2.0
+output application/java
+---
+(payload.RCAA19 default "") replace " " with ""]]></ee:set-variable>
 						</ee:variables>
 					</ee:transform>
-			<salesforce:query doc:name="Query" doc:id="a0689a64-277d-480b-b298-5cad47ab4164" config-ref="Salesforce_Config" target="sfresponse">
-			<salesforce:salesforce-query><![CDATA[#[vars.query]]]></salesforce:salesforce-query>
-		</salesforce:query>
-			<choice doc:name="Choice" doc:id="3d360719-c745-445a-aeed-fcfc8c1d4511">
-						<when expression="#[sizeOf(vars.sfresponse) &gt; 0]">
-							<ee:transform doc:name="Transform Message" doc:id="600c8c1d-ccd6-45ef-9f5e-8c7799eb2c0c">
+					<ee:transform doc:name="Transform Message" doc:id="600c8c1d-ccd6-45ef-9f5e-8c7799eb2c0c">
 								<ee:message>
+							<ee:set-payload resource="dwl/jpn-data.dwl" />
 								</ee:message>
 								<ee:variables>
 									<ee:set-variable variableName="RCAA19"><![CDATA[%dw 2.0
 output application/json
 ---
 trim(payload.RCAA19) default "" ++ "," ++ vars.RCAA19 as String]]></ee:set-variable>
-							<ee:set-variable variableName="upload" ><![CDATA[%dw 2.0
-output application/java
----
-[{
-  Part_Number__c : payload.RCAA19,
-  Stocking_Type_Code__c: 
-    if (payload."RC74USTA" == "0") "0-Customer pending apart no."
-    else if (payload."RC74USTA" == "1") "1-Available part no."
-    else if (payload."RC74USTA" == "2") "2-Old part no."
-    else if (payload."RC74USTA" == "3") "3-Part to be phased out"
-    else if (payload."RC74USTA" == "4") "4-Purchased part"
-    else if (payload."RC74USTA" == "6") "6-Production plan part no."
-    else if (payload."RC74USTA" == "7") "7-Dead part no."
-    else if (payload."RC74USTA" == "9") "9-Substitution part no."
-    else "" ,
-    External_ID__c : trim(payload.RCAA19) ++ "-JPN-NTN" ,
-    NTN_Company_Number__c : "00001",
-    Origin__c : "JPN",
-    Brand__c : "NTN" ,
-    Part_Number_Type__c : "Base" ,
-    Source__c : "JAPAN",
-    ProductCode : payload.RCAA19 ,
-    CIF_Min__c : 0.00,
-    Landed_Cost_Max__c : 0.00 ,
-    Landed_Cost_Min__c : 0.00 ,
-    Estimated_Production_Lead_Time_Max__c : "0.00",
-    Estimated_Production_Lead_Time_Min__c : "0.00",
-    IsActive: true as Boolean ,
-    Id : vars.sfresponse.Id[0]
-}]
-]]></ee:set-variable>
 								</ee:variables>
 							</ee:transform>
-							<salesforce:upsert doc:name="Upsert" doc:id="b2edf642-6de0-49f6-9d3a-3db50bc25284" config-ref="Salesforce_Config" objectType="Product2" externalIdFieldName="External_ID__c">
-						<salesforce:records ><![CDATA[#[vars.upload]]]></salesforce:records>
-					</salesforce:upsert>
-					<choice doc:name="Choice" doc:id="33a37959-c83a-491a-a0f5-72157aa8cd31" >
-						<when expression="#[payload.successful != true]">
-							<ee:transform doc:name="Transform Message" doc:id="44d000ff-42bc-464e-833e-1b6b3b81f802">
-						<ee:message>
-						</ee:message>
-						<ee:variables>
-									<ee:set-variable variableName="errorIds" ><![CDATA[%dw 2.0
-output application/json skipNullOn = 'everywhere'
+					<salesforce:query doc:name="query-if-sfID-exists" doc:id="a0689a64-277d-480b-b298-5cad47ab4164" config-ref="Salesforce_Config" target="sfresponse">
+			<salesforce:salesforce-query><![CDATA[#[vars.query]]]></salesforce:salesforce-query>
+		</salesforce:query>
+					<choice doc:name="Choice" doc:id="bb3189ed-2016-4f47-b708-32f0a4ae3089" tracking:enable-default-events="true">
+						<when expression="#[sizeOf(vars.sfresponse) &gt; 0]">
+							<ee:transform doc:name="tranform-data-to-update" doc:id="91c53e37-482a-4df5-b491-d23ba1d2243d" >
+								<ee:message >
+									<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
 ---
- [{
-	part_number : vars.upload.Part_Number__c[0],
-	successMessage : payload.successful	
-}
-] + vars.errorIds  default [] ]]></ee:set-variable>
-						</ee:variables>
-					</ee:transform>
-							<logger level="INFO" doc:name="Logger" doc:id="f20c6951-74f8-4b1b-8b4e-6f1dc489d729" message="#[payload.successful]" />
+{data: (payload ++ {"Id": (vars.sfresponse."Id"[0])}), "operation": "Update"}]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
 						</when>
 						<otherwise >
-							<logger level="INFO" doc:name="Logger" doc:id="eb699172-6864-410d-b78f-a7fb59f93c36" message='#["Update Successful"]'/>
-							<!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message" doc:id="995a0035-70e1-4cf5-b3f7-a8d1a2889717" >
+							<ee:transform doc:name="Transform Message" doc:id="369c1371-6126-48d2-9d8c-31b966fe9d08" >
 								<ee:message >
 								</ee:message>
 								<ee:variables >
-									<ee:set-variable variableName="successIds" ><![CDATA[%dw 2.0
-output application/json skipNullOn = 'everywhere'
-&#45;&#45;-
- [{
-	part_number : vars.upload.Part_Number__c[0&#93;,
-	successMessage : payload.successful
-	
-}
-&#93; + vars.successIds  default [&#93; &#93;&#93;></ee:set-variable>
+									<ee:set-variable variableName="queryPartNumber" ><![CDATA[%dw 2.0
+output application/java
+var externalId = trim(payload.RCAA19 default "") ++ "-JPN-NTN"
+---
+"SELECT Part_Number__c, Id, Name FROM Product2 WHERE  Part_Number__c = '" ++ vars.cleanedPartNumber ++ "'"
+]]></ee:set-variable>
 								</ee:variables>
-							</ee:transform> [STUDIO] -->
+							</ee:transform>
+							<salesforce:query doc:name="query-part-number" doc:id="f24086cb-9314-4e90-900a-8df3fdd07695" config-ref="Salesforce_Config" target="partNumber">
+								<salesforce:salesforce-query ><![CDATA[#[vars.queryPartNumber]]]></salesforce:salesforce-query>
+							</salesforce:query>
+							<choice doc:name="Choice" doc:id="6a8e4b12-356b-4dd2-beb6-58257597b4e4" tracking:enable-default-events="true">
+								<when expression="#[sizeOf(vars.partNumber) &gt; 0]">
+									<ee:transform doc:name="tranform-data-to-update" doc:id="a2f9d313-2a6e-49ca-bf59-17e72f490405" >
+										<ee:message >
+											<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{data: (payload ++ {"Id": (vars.sfresponse."Id"[0])}), "operation": "Update"}]]></ee:set-payload>
+										</ee:message>
+									</ee:transform>
+								</when>
+								<otherwise >
+									<ee:transform doc:name="tranform-data-to-create" doc:id="ec4cee04-fbb2-47e4-bdae-2c9713d87339" >
+										<ee:message >
+											<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{data: (payload ), "operation": "Create"}]]></ee:set-payload>
+										</ee:message>
+									</ee:transform>
+								</otherwise>
+							</choice>
 						</otherwise>
 					</choice>
-						</when>
-						<otherwise>
-							<logger level="INFO" doc:name="Logger" doc:id="47f39c35-2d60-4d7c-a4d0-78fd38dc8fb1" message="#[payload.successful]" />
-						</otherwise>
-					</choice>
-		</foreach>
+					<async doc:name="Async" doc:id="fe4da070-f4c6-4aaf-a95e-8f6dbc10f4f1" >
+						<logger level="INFO" doc:name="Logger" doc:id="c87f294d-44cc-4e37-a126-04a3dedd2cb2" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{Id : payload.data.Id default "",&#10; External_Id__c : payload.data.External_ID__c,&#10; Operation : payload.operation,&#10; "Log Step" : "Before Batch Aggregator"&#10;}]' />
+					</async>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="7d97a256-8961-487c-b72b-84af97e25912" size="200">
+						<!-- [STUDIO:"Logger"]<logger level="INFO" doc:name="Logger" doc:id="3fea3308-9f66-4dc4-a9b6-d3e165ef7563" message="#[%dw 2.0&#10;output application/json&#10;&#45;&#45;-&#10;payload&#93;"/> [STUDIO] -->
+						<ee:transform doc:name="Transform Message" doc:id="d797e419-94da-4c2c-8bb9-91da745db269">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map read( $, 'application/json')]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<ee:transform doc:name="Transform Message1" doc:id="039161e4-cd89-4c2d-b762-8df695cdd9a3">
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json  skipNullOn="everywhere"
+---
+{"Update" : payload.operation map ((item, index) -> if(item == "Update")
+payload.data[index]
+else null),
+"Create" : payload.operation map ((item, index) -> if(item == "Create")
+payload.data[index]
+else null)
+}
+ ]]></ee:set-payload>
+							</ee:message>
+							<ee:variables>
+							</ee:variables>
+						</ee:transform>
+						<async doc:name="Async" doc:id="e64cc185-fa1e-4c84-8a7c-f766ac4b3006" >
+							<logger level="DEBUG" doc:name="payload before Create/ Update of Japan-master" doc:id="54661264-5424-4f91-83cd-bd7c7508055a" message="#[%dw 2.0&#10;output application/json indent=false&#10;---&#10;payload]" />
+						</async>
+						<flow-ref doc:name="create-update-products-subflow" doc:id="3b4a23e5-9119-4f88-83ac-05aed38a5b09" name="create-update-products-subflow"/>
+						<logger level="INFO" doc:name="Logger" doc:id="c4feae24-9065-48de-a81c-59d1b8624f9a" message='#["/n Batch Aggregator Completed"]'/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="8cc4323b-74aa-47e3-9794-8f5dbd5a5bdb" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
 		<logger level="INFO" doc:name="End Logger" doc:id="b07e6ca2-ce11-4e97-ac0c-067857a618a1" message='#[flatten(vars.errorIds ) filter ((item) -&gt; item != null)]'/>
+		<error-handler ref="global-error-handler"/>
 	</flow>
+	<sub-flow name="create-update-products-subflow" doc:id="4954cde3-cdb2-4a5f-89d3-487d6f678c24" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="4d91f68d-1fbc-4655-a7f5-0dec93cfc6d3" >
+			<route >
+				<ee:transform doc:name="Create" doc:id="f880d101-c40e-4462-b9e7-8f8b7b8c84d8" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload."Create"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<choice doc:name="Choice" doc:id="d3c571ee-f7e0-4c1c-b3ee-acf07d3c329d" >
+					<when expression="#[!isEmpty(payload)]">
+						<ee:transform doc:name="Transform Message" doc:id="324a4a37-9e0e-40d9-b0eb-59239e8e0105" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<flow-ref doc:name="create-update-products-subflow" doc:id="a16a95d0-581a-4c0a-a884-d3411a197086" name="create_salesforce_sub_Flow"/>
+					</when>
+					<otherwise >
+						<logger level="INFO" doc:name="Logger" doc:id="05fb4023-7de5-4bcd-924c-ae4570b6b5fd" message="Nothing to create"/>
+					</otherwise>
+				</choice>
+			</route>
+			<route >
+				<ee:transform doc:name="Update" doc:id="fffe632e-d99d-4521-9406-09e1757396bf" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload."Update"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<choice doc:name="Choice" doc:id="1ba1f2e9-974f-4491-ba42-2a3183fd511d" >
+					<when expression="#[!isEmpty(payload)]">
+						<ee:transform doc:name="Transform Message" doc:id="e974c6d7-66f5-4cf7-b5fa-51027e297874" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<flow-ref doc:name="update_salesforce_sub_flow" doc:id="cfe6252a-c7c1-4f3d-81d3-185acf62d9e7" name="update_salesforce_Sub_Flow"/>
+					</when>
+					<otherwise >
+						<logger level="INFO" doc:name="Logger" doc:id="f31f059f-a623-4dd0-bd07-ea283cb0f166" message="Nothing to update"/>
+					</otherwise>
+				</choice>
+			</route>
+		</scatter-gather>
+	</sub-flow>
+	<sub-flow name="update_salesforce_Sub_Flow" doc:id="63714603-db86-4144-87b3-1d2be3630903" >
+									<logger level="INFO" doc:name="Logger" doc:id="c746ca17-3041-4734-927b-5fd63639174e" message='#["\n Start Logger for Salesforce Update"]' />
+								<ee:transform doc:name="create-payload-for-bulk-update" doc:id="37358c8a-3983-4fda-ae96-0830b8c7e3b8" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="updatePayload" ><![CDATA[%dw 2.0
+output application/csv lineSeparator="\n"
+---
+payload map (item) -> (item)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<try doc:name="Try" doc:id="fe4eb6db-ff29-4150-a1fe-db7e3ed0715a" >
+			<salesforce:create-job-bulk-api-v2 doc:name="update-via-bulk-api-v2" doc:id="d5537765-f7af-41c2-a5c5-481906fb31ba" config-ref="Salesforce_Config" objectType="Product2" operation="update" externalIdFieldName="External_ID__c">
+			<salesforce:s-objects><![CDATA[#[vars.updatePayload]]]></salesforce:s-objects>
+		</salesforce:create-job-bulk-api-v2>
+			<logger level="INFO" doc:name="Logger" doc:id="d8161d81-6715-49fb-869d-79be8745e8b4" message='#["\n update-via-bulk-api-v2 complete"]'/>
+			<error-handler ref="global-error-handler" />
+		</try>
+		<ee:transform doc:name="Transform Message" doc:id="26d46263-a978-4a9a-b780-0605b9469bfd" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="updateResponse" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<async doc:name="Async" doc:id="ab239847-d74f-4caa-8124-6f5284669901" >
+			<email:send doc:name="Send" doc:id="0d767b32-00ca-418c-bfa4-7659b518cb20" subject="#[&quot;E-mail Notification:&quot; ++  p('app.env') ++ &quot;*** JAPAN-MASTER Update Report for : &quot; ++ p('app.name')  ++&quot;-&quot; ++ p('app.env')]" toAddresses="#[p('smtp.to') splitBy &quot;,&quot;]" config-ref="NTN_SMTP">
+			<email:body contentType="text/html" encoding="UTF-8">
+				<email:content><![CDATA[#[%dw 2.0
+output application/xml
+skipNullOn="everywhere"
+
+---
+{
+    "html":{
+        "body":{
+            "div" @(class:"total"):{
+
+                "div" @(class:"content"):{
+                    "p": "Hi,",
+                    "p": "Greetings!!!",
+					"p": "Please check the UPDATE JAPAN-Master records attached",
+                }
+                }
+            }
+        }
+    }]]]></email:content>
+				</email:body>
+			<email:attachments><![CDATA[#[%dw 2.0
+output application/csv
+---
+{
+	"updatePayload.csv": vars.updatePayload,
+	"updateResponse.json" : vars.updateResponse }]]]></email:attachments>
+			</email:send>
+		</async>
+		<logger level="INFO" doc:name="payload to send on email" doc:id="dbe7726c-d5eb-45d6-8daf-715005b73908" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{"payload to send on email" : vars.updateResponse}]' />
+		
+	</sub-flow>
+	<sub-flow name="create_salesforce_sub_Flow" doc:id="48517557-b548-463b-be92-bf29e884599f" >
+									<logger level="INFO" doc:name="Logger" doc:id="8db2aac6-1bec-45b5-8afa-ed7af4d9bcd3" message='#["\n Starting Salesforce Create for NEW JAPAN Parts"]' />
+								<ee:transform doc:name="Transform Message" doc:id="17ced4fd-e51f-4bb3-8874-b9c53cea238c">
+									<ee:message>
+									</ee:message>
+									<ee:variables>
+				<ee:set-variable variableName="createPB" ><![CDATA[%dw 2.0
+output application/json
+---
+payload
+]]></ee:set-variable>
+									</ee:variables>
+								</ee:transform>
+								<try doc:name="Try" doc:id="2601ff0a-3873-42a4-8b27-e932efde2db8" >
+			<salesforce:create doc:name="Create" doc:id="21f0b1c4-1b1d-41d1-a783-bbbe778d699d" config-ref="Salesforce_Config" type="Product2">
+				<salesforce:records ><![CDATA[#[vars.createPB]]]></salesforce:records>
+							</salesforce:create>
+			<logger level="INFO" doc:name="Logger" doc:id="a2511c37-7a57-4701-a8e9-95c5acf173ca" message='#["\n Salesforce Create operation complete"]'/>
+			<error-handler ref="global-error-handler" />
+		</try>
+		<ee:transform doc:name="Transform Message" doc:id="42353ea3-85f7-4552-be57-803a00af9327" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="createResponse" ><![CDATA[%dw 2.0
+output application/json
+//var externalIds = testVar.Update.External_ID__c
+---
+if (payload.successful == true) {Successful : payload.items map ((item, index) -> {
+ 
+    Id: item.id,
+    Status: item.successful
+ 
+} )}
+else (payload.items filter ((item, index) -> item.exception != null) map(item,index) -> {
+	"MessageSender": "Create JAPAN-MASTER Records Failed",
+	failedId: item.id,
+  	"Status Code": item.statusCode default "No Status Code Received from Salesforce",
+	message: item.exception.message default "No Error Message Received from Salesforce",
+  	payload: if(item.statusCode != "DUPLICATE VALUE") (vars.createPB filter ((item1, index) -> item1.id == item.id) map ((filteredItem) -> filteredItem) ) else ""
+	
+})]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<async doc:name="Async" doc:id="b3bb02e5-cd90-404b-b66d-9c989d1f32b2" >
+			<email:send doc:name="Send" doc:id="dfdc9ddf-2d91-4b8c-af8b-66cabbde740f" subject="#[&quot;*** E-mail Notification:&quot;++ p('app.env')++ &quot;*** JAPAN-MASTER Create Report for : &quot; ++ p('app.name') ++&quot;-&quot; ++ p('app.env')]" toAddresses="#[p('smtp.to') splitBy &quot;,&quot;]" config-ref="NTN_SMTP">
+			<email:body contentType="text/html" encoding="UTF-8">
+				<email:content><![CDATA[#[%dw 2.0
+output application/xml
+skipNullOn="everywhere"
+
+---
+{
+    "html":{
+        "body":{
+            "div" @(class:"total"):{
+
+                "div" @(class:"content"):{
+                    "p": "Hi,",
+                    "p": "Greetings!!!",
+					"p": "Please check the Create JAPAN-Master records attached"
+                }
+                }
+            }
+        }
+    }]]]></email:content>
+			</email:body>
+			<email:attachments><![CDATA[#[%dw 2.0
+output application/csv
+---
+{
+	"createPB.csv": vars.createPB,
+	 "createResponse.json" : vars.createResponse }]]]></email:attachments>
+		</email:send>
+		</async>
+		<logger level="INFO" doc:name="Logger" doc:id="3015cb33-f7a5-41aa-b7e4-6fd2fbb013fb" message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {&#10;  (payload."items" map() -&gt; {&#10;  "Workflow": "JPN Master Create",&#10;	product2Id: $.id,&#10;	message: "success : " ++ $.payload.success ++ ""&#10;})&#10;}&#10;else (payload.items map() -&gt; {&#10;  "Workflow": "JPN Master Create",&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
+		<ee:transform doc:name="map-product2id" doc:id="95eec4ca-7a3e-4bc4-8c92-e1e3b62f06c5">
+									<ee:message>
+									</ee:message>
+									<ee:variables>
+										<ee:set-variable resource="dwl/var-product2id.dwl" variableName="product2id" />
+									</ee:variables>
+								</ee:transform>
+								<flow-ref doc:name="get-pricebook-id" doc:id="e876d101-3c22-49fa-afcf-d973ceab9ea9" name="get-pricebook-id" />
+								<ee:transform doc:name="create-payload-for-pricebooks" doc:id="b442acb5-068f-454d-86de-12529a9766fa">
+									<ee:message>
+										<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.createPB map (item, index) -> (
+{
+  	IsActive: item.IsActive,
+  	CurrencyIsoCode : if(item.CurrencyIsoCode == "00001") "CAD" else "USD",
+  	Product2Id : vars.product2id.Product2Id[index],
+  	PriceBookId: payload,
+  	UnitPrice : 0 
+})]]></ee:set-payload>
+									</ee:message>
+								</ee:transform>
+								<async doc:name="Async" doc:id="4b0034aa-c619-481a-8957-f166d73de81d">
+			<try doc:name="Try" doc:id="6d5267a2-d140-4df9-afa1-8ed89301b076" >
+				<until-successful maxRetries="5" doc:name="Until Successful" doc:id="26b14c7e-fc9f-4ffc-8a00-cc15ae51b360">
+				<http:request method="POST" doc:id="f0a7e35e-da0e-4ec6-bee6-2fdb3eb07e77" config-ref="HTTP_Request_configuration" path="${pricebooks.uri}" doc:name="Request">
+				<http:body><![CDATA[#[%dw 2.0
+output application/json
+---
+payload]]]></http:body>
+			</http:request>
+			</until-successful>
+				<error-handler ref="global-error-handler" />
+			</try>
+			<logger level="INFO" doc:name="Logger" doc:id="91653105-8dd0-4139-ac33-c8af8f5f1667" message='#["Request to PriceBooks API Completed."]' />
+								</async>
+	
+	
+	</sub-flow>
+	<sub-flow name="get-pricebook-id" doc:id="3be9a04f-af55-4ae2-825f-67e72f5553ef" >
+		<ee:transform doc:name="Transform Message" doc:id="22ad7221-bb69-4b4d-bbb8-ca2465db4b7e" >
+			<ee:message >
+				<ee:set-payload resource="dwl/priceBooks.dwl" />
+			</ee:message>
+		</ee:transform>
+		<try doc:name="Try" doc:id="a09aff0e-5285-4daf-81d0-ba796693f231" >
+			<salesforce-composite:execute-composite-request doc:name="Execute composite request" doc:id="efdb93fa-a272-4a4f-a42e-b34321c12fd2" config-ref="Salesforce_Composite_Config" />
+			<error-handler ref="global-error-handler" />
+		</try>
+		<ee:transform doc:name="Transform Message" doc:id="4bf78030-17a2-4d3c-bac8-1fb3d2830d5d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{id:(payload.compositeResponse map ($..body."records")[0]) map ((item, index) -> item[0].Id)}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="bda8e6fb-b6f7-445b-bcd2-2de9f36d1261" message='"The list of PriceBook IDs are : " ++ #[payload]' />
+	</sub-flow>
 </mule>
