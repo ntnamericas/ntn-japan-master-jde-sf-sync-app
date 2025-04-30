@@ -37,7 +37,8 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 					<ee:message>
 					</ee:message>
 					<ee:variables>
-						<ee:set-variable variableName="query"><![CDATA[p('db.query')]]></ee:set-variable>
+						<ee:set-variable variableName="query"><![CDATA[p('db.query')
+]]></ee:set-variable>
 					</ee:variables>
 				</ee:transform>
 		<db:select doc:name="Select" doc:id="872014a1-a651-486d-8d3e-7198b280e6ea" config-ref="db_config" fetchSize="#[vars.count[0].'COUNT(*)']" maxRows="#[vars.count[0].'COUNT(*)']">
@@ -55,7 +56,7 @@ payload]]></ee:set-payload>
 				<ee:set-variable variableName="RCAA19" ><![CDATA[""]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<batch:job jobName="ntn-japan-master-jde-sapi-Batch_Job" doc:id="45d0a331-3f41-4368-b322-914f3ad26573" blockSize="1000" maxFailedRecords="-1">
+		<batch:job jobName="ntn-japan-master-jde-sapi-Batch_Job" doc:id="45d0a331-3f41-4368-b322-914f3ad26573" blockSize="1" maxFailedRecords="-1">
 			<batch:process-records >
 				<batch:step name="Batch_Step" doc:id="6686045f-2adf-4835-a6ae-f70e7dde832a" >
 					<ee:transform doc:name="Transform Message" doc:id="61c993e6-60df-48f1-adfe-ea289da4c542">
