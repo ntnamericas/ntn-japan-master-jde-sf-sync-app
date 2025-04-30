@@ -24,7 +24,11 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 		<secure-properties:encrypt algorithm="Blowfish" />
 	</secure-properties:config>
 	<salesforce-composite:composite-config name="Salesforce_Composite_Config" doc:name="Salesforce Composite Config" doc:id="2f0ec4cd-be27-4df7-8443-bc71d29ba480" >
-		<salesforce-composite:oauth-user-pass-connection consumerKey="${secure::sf.key}" consumerSecret="${secure::sf.secret}" username="${sf.user}" password="${secure::sf.password}" securityToken="${secure::sf.token}" tokenEndpoint="${sf.URL}"/>
+		<salesforce-composite:oauth-user-pass-connection consumerKey="${secure::sf.key}" consumerSecret="${secure::sf.secret}" username="${sf.user}" password="${secure::sf.password}" securityToken="${secure::sf.token}" tokenEndpoint="${sf.URL}">
+			<reconnection >
+				<reconnect-forever />
+			</reconnection>
+		</salesforce-composite:oauth-user-pass-connection>
 	</salesforce-composite:composite-config>
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="584ce206-5a8f-424a-969e-93bc7cce6da6" basePath="${pricebooks.basePath}" >
 		<http:request-connection host="${pricebooks.host}" port="${pricebooks.port}" protocol="HTTPS"/>

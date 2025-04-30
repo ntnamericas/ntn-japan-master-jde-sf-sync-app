@@ -4,7 +4,7 @@
 
 	<groupId>com.ntn</groupId>
 	<artifactId>ntn-jpn-master-jde-sf-sync-app</artifactId>
-	<version>1.1.0-rc10</version>
+	<version>1.1.0-rc11</version>
 	<packaging>mule-application</packaging>
 
 	<name>ntn-jpn-master-jde-sf-sync-app</name>
