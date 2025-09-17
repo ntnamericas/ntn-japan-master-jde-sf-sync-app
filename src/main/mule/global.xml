@@ -12,7 +12,7 @@ http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/sc
 http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<db:config name="db_config" doc:name="Database Config" doc:id="9dc8ea48-bb4d-4f9c-92f8-a46477dd2618" >
-		<db:oracle-connection host="${db.host}" user="${db.user}" password="${secure::db.password}" serviceName="${db.service}" port="${db.port}"/>
+		<db:oracle-connection host="${db.host}" user="${secure::db.user}" password="${secure::db.password}" serviceName="${db.service}" port="${db.port}"/>
 	</db:config>
 	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="5c8ef4b9-f457-4eae-975b-1ec8ef0474e1" >
 		<salesforce:basic-connection username="${sf.user}" password="${secure::sf.password}" securityToken="${secure::sf.token}" url="${sf.authURL}" />

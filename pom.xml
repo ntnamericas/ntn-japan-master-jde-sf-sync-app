@@ -4,7 +4,7 @@
 
 	<groupId>com.ntn</groupId>
 	<artifactId>ntn-jpn-master-jde-sf-sync-app</artifactId>
-	<version>1.1.0-rc11</version>
+	<version>1.1.0-rc14</version>
 	<packaging>mule-application</packaging>
 
 	<name>ntn-jpn-master-jde-sf-sync-app</name>
@@ -30,21 +30,24 @@
 				<artifactId>mule-maven-plugin</artifactId>
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
-				<configuration>
+				<!-- <configuration>
 					<sharedLibraries>
 						<sharedLibrary>
 							<groupId>com.mycompany</groupId>
-							<artifactId>ojdbc8-12.2.0.1</artifactId>
+							<artifactId>ojdbc8-12.2.0.1-0.1</artifactId>
 						</sharedLibrary>
 					</sharedLibraries>
 					<classifier>mule-application</classifier>
-					<sharedLibraries>
-						<sharedLibrary>
-							<groupId>com.mycompany</groupId>
-							<artifactId>ojdbc8-12.2.0.1</artifactId>
-						</sharedLibrary>
-					</sharedLibraries>
-				</configuration>
+				</configuration> -->
+				<configuration>
+			        <sharedLibraries>
+			            <sharedLibrary>
+			                <groupId>com.oracle.database.jdbc</groupId>
+			                <artifactId>ojdbc11</artifactId>
+			            </sharedLibrary>
+			        </sharedLibraries>
+			        <classifier>mule-application</classifier>
+			    </configuration>
 			</plugin>
 			<plugin>
 				<groupId>com.mulesoft.munit.tools</groupId>
@@ -84,11 +87,6 @@
 			<artifactId>mule-secure-configuration-property-module</artifactId>
 			<version>1.2.7</version>
 			<classifier>mule-plugin</classifier>
-		</dependency>
-		<dependency>
-			<groupId>com.mycompany</groupId>
-			<artifactId>ojdbc8-12.2.0.1</artifactId>
-			<version>0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.mulesoft.connectors</groupId>
@@ -139,6 +137,16 @@
 			<artifactId>mule-db-connector</artifactId>
 			<version>1.14.14</version>
 			<classifier>mule-plugin</classifier>
+		</dependency>
+		<!-- <dependency>
+			<groupId>com.mycompany</groupId>
+			<artifactId>ojdbc8-12.2.0.1-0.1</artifactId>
+			<version>0.1</version>
+		</dependency> -->
+		<dependency>
+		    <groupId>com.oracle.database.jdbc</groupId>
+		    <artifactId>ojdbc11</artifactId>
+		    <version>23.9.0.25.07</version>
 		</dependency>
 	</dependencies>
 

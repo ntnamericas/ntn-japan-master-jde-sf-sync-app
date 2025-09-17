@@ -31,4 +31,8 @@ query:
   timeout: "10"
   timeoutUnit: "MINUTES" 
   maxRows: "30000"   
+  
+cron:
+ expression: "0 0 4 ? * WED"
+ timezone: "America/New_York"
     
