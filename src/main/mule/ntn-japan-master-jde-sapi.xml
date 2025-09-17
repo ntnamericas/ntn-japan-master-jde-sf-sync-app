@@ -18,7 +18,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 
 		<scheduler doc:name="Scheduler" doc:id="044f123d-8c62-4422-9421-1c91f4bb05a5" >
 			<scheduling-strategy >
-				<fixed-frequency timeUnit="DAYS" frequency="2"/>
+				<cron expression="${cron.expression}" timeZone="${cron.timezone}" />
 			</scheduling-strategy>
 		</scheduler>		
 		<logger level="INFO" doc:name="start logger of ntn-japan-master-jde-sapi-flow" doc:id="54fc93c3-c802-48c5-9e74-cd66f6355504" message='#["start logger of ntn-japan-master-jde-sapi-flow"]'/>
