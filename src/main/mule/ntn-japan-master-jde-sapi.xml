@@ -255,9 +255,12 @@ payload map (item) -> (item)]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
 		<try doc:name="Try" doc:id="fe4eb6db-ff29-4150-a1fe-db7e3ed0715a" >
-			<salesforce:create-job-bulk-api-v2 doc:name="update-via-bulk-api-v2" doc:id="d5537765-f7af-41c2-a5c5-481906fb31ba" config-ref="Salesforce_Config" objectType="Product2" operation="update" externalIdFieldName="External_ID__c">
-			<salesforce:s-objects><![CDATA[#[vars.updatePayload]]]></salesforce:s-objects>
+			<until-successful maxRetries="5" doc:name="Until Successful" doc:id="b0bad3a3-9dff-428f-9e5e-2b287104a3ee" >
+				<salesforce:create-job-bulk-api-v2 doc:name="update-via-bulk-api-v2" doc:id="d5537765-f7af-41c2-a5c5-481906fb31ba" config-ref="Salesforce_Config" objectType="Product2" operation="update" externalIdFieldName="External_ID__c">
+			<reconnect-forever frequency="20000" />
+				<salesforce:s-objects><![CDATA[#[vars.updatePayload]]]></salesforce:s-objects>
 		</salesforce:create-job-bulk-api-v2>
+			</until-successful>
 			<logger level="INFO" doc:name="Logger" doc:id="d8161d81-6715-49fb-869d-79be8745e8b4" message='#["\n update-via-bulk-api-v2 complete"]'/>
 			<error-handler ref="global-error-handler" />
 		</try>
@@ -319,9 +322,12 @@ payload
 									</ee:variables>
 								</ee:transform>
 								<try doc:name="Try" doc:id="2601ff0a-3873-42a4-8b27-e932efde2db8" >
-			<salesforce:create doc:name="Create" doc:id="21f0b1c4-1b1d-41d1-a783-bbbe778d699d" config-ref="Salesforce_Config" type="Product2">
-				<salesforce:records ><![CDATA[#[vars.createPB]]]></salesforce:records>
+			<until-successful maxRetries="5" doc:name="Until Successful" doc:id="cbfcaed5-e18f-4147-90f5-d5e5ae69de29" >
+				<salesforce:create doc:name="Create" doc:id="21f0b1c4-1b1d-41d1-a783-bbbe778d699d" config-ref="Salesforce_Config" type="Product2">
+				<reconnect-forever frequency="20000" />
+				<salesforce:records><![CDATA[#[vars.createPB]]]></salesforce:records>
 							</salesforce:create>
+			</until-successful>
 			<logger level="INFO" doc:name="Logger" doc:id="a2511c37-7a57-4701-a8e9-95c5acf173ca" message='#["\n Salesforce Create operation complete"]'/>
 			<error-handler ref="global-error-handler" />
 		</try>
@@ -428,7 +434,11 @@ payload]]]></http:body>
 			</ee:message>
 		</ee:transform>
 		<try doc:name="Try" doc:id="a09aff0e-5285-4daf-81d0-ba796693f231" >
-			<salesforce-composite:execute-composite-request doc:name="Execute composite request" doc:id="efdb93fa-a272-4a4f-a42e-b34321c12fd2" config-ref="Salesforce_Composite_Config" />
+			<until-successful maxRetries="5" doc:name="Until Successful" doc:id="78e2c9f9-c85a-4f46-ab16-981a5d4e6530" >
+				<salesforce-composite:execute-composite-request doc:name="Execute composite request" doc:id="efdb93fa-a272-4a4f-a42e-b34321c12fd2" config-ref="Salesforce_Composite_Config">
+				<reconnect-forever frequency="20000" />
+			</salesforce-composite:execute-composite-request>
+			</until-successful>
 			<error-handler ref="global-error-handler" />
 		</try>
 		<ee:transform doc:name="Transform Message" doc:id="4bf78030-17a2-4d3c-bac8-1fb3d2830d5d" >
