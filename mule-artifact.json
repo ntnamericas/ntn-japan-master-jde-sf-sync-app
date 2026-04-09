@@ -1,4 +1,45 @@
 {
-    "minMuleVersion": "4.8.0",
-    "javaSpecificationVersions": ["17"]
+  "configs": [
+    "global.xml",
+    "ntn-japan-master-jde-sapi.xml",
+    "global-error-handler.xml"
+  ],
+  "secureProperties": [],
+  "supportedJavaVersions": [],
+  "redeploymentEnabled": true,
+  "name": "com.ntn:ntn-jpn-master-jde-sf-sync-app:1.1.0-rc15",
+  "minMuleVersion": "4.8.0",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedPackages": [],
+      "exportedResources": [
+        "application-types.xml",
+        "dwl/jpn-data.dwl",
+        "dwl/priceBooks.dwl",
+        "dwl/var-createPB.dwl",
+        "dwl/var-product2id.dwl",
+        "global-error-handler.xml",
+        "global.xml",
+        "log4j2.xml",
+        "ntn-japan-master-jde-sapi.xml",
+        "properties/common.yaml",
+        "properties/dev-properties.yaml",
+        "properties/dev-secure-properties.yaml",
+        "properties/local-properties.yaml",
+        "properties/local-secure-properties.yaml",
+        "properties/prod-properties.yaml",
+        "properties/prod-secure-properties.yaml",
+        "properties/qa-properties.yaml",
+        "properties/qa-secure-properties.yaml",
+        "properties/uat-properties.yaml",
+        "properties/uat-secure-properties.yaml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
 }
